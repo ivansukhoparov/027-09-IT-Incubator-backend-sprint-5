@@ -14,7 +14,7 @@ import { UsersService } from '../../../users/application/users.service';
 import { EmailService } from '../../../../common/email/email.service';
 import { BcryptAdapter } from '../../../../common/adapters/bcrypt.adapter';
 import { RefreshTokenRepository } from '../infrastructure/refresh.token.repository';
-import { UserCreateInputModel } from '../../../users/api/models/user.create.input.model';
+import { UserCreateInputModel } from '../../../users/api/admin/models/user.create.input.model';
 import { EmailConfirmationCodeService } from '../../../../common/token.services/email.confirmation.code.service';
 import { tokenServiceCommands } from '../../../../common/token.services/utils/common';
 import { LoginInputModel, UserEmailDto } from '../api/models/login.input.model';

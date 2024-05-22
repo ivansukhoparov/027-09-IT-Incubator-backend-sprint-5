@@ -19,7 +19,7 @@ import { UsersQueryRepository } from '../../../users/infrastructure/users.query.
 import { AuthGuard } from '../../../../infrastructure/guards/admin-auth-guard.service';
 import { AccessTokenService } from '../../../../common/token.services/access.token.service';
 import { tokenServiceCommands } from '../../../../common/token.services/utils/common';
-import { UserCreateInputModel } from '../../../users/api/models/user.create.input.model';
+import { UserCreateInputModel } from '../../../users/api/admin/models/user.create.input.model';
 import { SessionInputModel } from '../../devices/api/models/session.input.models';
 
 @Controller('auth')

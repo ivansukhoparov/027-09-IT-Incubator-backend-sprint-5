@@ -1,6 +1,6 @@
-import { IsStringLength } from '../../../../infrastructure/decorators/validate/is.string.length';
+import { IsStringLength } from '../../../../../infrastructure/decorators/validate/is.string.length';
 import { Matches } from 'class-validator';
-import { IsOptionalEmail } from '../../../../infrastructure/decorators/validate/is.optional.email';
+import { IsOptionalEmail } from '../../../../../infrastructure/decorators/validate/is.optional.email';
 
 export class UserCreateInputModel {
   @IsStringLength(3, 10)

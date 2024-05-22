@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { UsersController } from './api/users.controller';
+import { AdminUsersController } from './api/admin/admin.users.controller';
 import { UsersService } from './application/users.service';
 import { UsersRepository } from './infrastructure/users.repository';
 import { UsersQueryRepository } from './infrastructure/users.query.repository';
@@ -25,7 +25,7 @@ const queryCases = [GetAllUsersUseCase];
       },
     ]),
   ],
-  controllers: [UsersController],
+  controllers: [AdminUsersController],
   providers: [
     BcryptAdapter,
     UsersService,

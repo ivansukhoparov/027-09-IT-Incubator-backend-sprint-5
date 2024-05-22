@@ -11,19 +11,19 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { QueryUsersRequestType } from '../types/input';
+import { QueryUsersRequestType } from '../../types/input';
 import { UserCreateInputModel } from './models/user.create.input.model';
-import { AdminAuthGuard } from '../../../infrastructure/guards/admin-auth-guard.service';
+import { AdminAuthGuard } from '../../../../infrastructure/guards/admin-auth-guard.service';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { CreateUserCommand } from '../use.cases/create.user.use.case';
-import { DeleteUserCommand } from '../use.cases/delete.user.use.case';
-import { GetAllUsersQuery } from '../use.cases/get.all.users.use.case';
-import { UsersQueryRepository } from '../infrastructure/users.query.repository';
-import { UsersRepository } from '../infrastructure/users.repository';
-import { createQuery, createQueryS } from '../../common/create.query';
+import { CreateUserCommand } from '../../use.cases/create.user.use.case';
+import { DeleteUserCommand } from '../../use.cases/delete.user.use.case';
+import { GetAllUsersQuery } from '../../use.cases/get.all.users.use.case';
+import { UsersQueryRepository } from '../../infrastructure/users.query.repository';
+import { UsersRepository } from '../../infrastructure/users.repository';
+import { createQuery, createQueryS } from '../../../common/create.query';
 
 @Controller('sa/users')
-export class UsersController {
+export class AdminUsersController {
   constructor(
     protected commandBus: CommandBus,
     protected queryBus: QueryBus,
