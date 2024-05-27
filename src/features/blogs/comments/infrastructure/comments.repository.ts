@@ -4,6 +4,7 @@ import { CommentDocument, Comments } from './comments.schema';
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { UpdateCommentInputModel } from '../api/models/comments.input.models';
+import { BlogDocument } from '../../blogs/infrastructure/blogs.schema';
 
 @Injectable()
 export class CommentsRepository {
@@ -12,18 +13,26 @@ export class CommentsRepository {
   ) {}
 
   async getCommentById(commentId: string) {
-    const comment: CommentDocument =
-      await this.commentModel.findById(commentId);
-    if (comment) {
-      return comment;
-    } else {
-      throw new NotFoundException();
+    try {
+      const comment: CommentDocument =
+        await this.commentModel.findById(commentId);
+      if (comment) {
+        return comment;
+      } else {
+        throw new NotFoundException();
+      }
+    } catch {
+      throw NotFoundException;
     }
   }
 
   async createComment(commentDto: Comments): Promise<string> {
-    const newComment = await this.commentModel.create(commentDto);
-    return newComment._id.toString();
+    try {
+      const newComment = await this.commentModel.create(commentDto);
+      return newComment._id.toString();
+    } catch {
+      throw NotFoundException;
+    }
   }
 
   async updateComment(id: string, updateDto: UpdateCommentInputModel) {
@@ -44,6 +53,15 @@ export class CommentsRepository {
       return true;
     } catch {
       throw new NotFoundException();
+    }
+  }
+
+  async isCommentExist(id: string) {
+    try {
+      const blog: BlogDocument = await this.commentModel.findById(id);
+      return !!blog;
+    } catch {
+      return false;
     }
   }
 }

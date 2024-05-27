@@ -12,6 +12,7 @@ import {
   UseGuards,
   Req,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { PostsService } from '../application/posts.service';
 import { PostsQueryRepository } from '../infrastructure/posts.query.repository';
@@ -123,11 +124,11 @@ export class PostsController {
     return await this.postsQueryRepository.getPostById(newPostId);
   }
 
-  @Post(':id/comments')
+  @Post(':postId/comments')
   @UseGuards(AuthGuard)
   async createNewCommentToPost(
     @Req() req: any,
-    @Param('id') id: string,
+    @Param('postId') postId: string,
     @Body() inputModel: CommentCreateInputModel,
   ) {
     const authHeader = req.header('authorization')?.split(' ');
@@ -140,7 +141,7 @@ export class PostsController {
 
     const commentCreateDto: CommentCreateDto = {
       content: inputModel.content,
-      postId: id,
+      postId: postId,
       userId: user.id,
       userLogin: user.login,
     };
@@ -149,41 +150,26 @@ export class PostsController {
     return await this.commentsQueryRepository.getById(commentId);
   }
 
-  @Put(':id')
-  @UseGuards(AdminAuthGuard)
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async updateById(
-    @Param('id') id: string,
-    @Body() inputModel: UpdatePostInputModel,
-  ) {
-    await this.postsService.updatePost(id, inputModel);
-    return {};
-  }
-
-  @Put(':id/like-status')
+  @Put(':postID/like-status')
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateLikeStatus(
-    @Param('id') id: string,
+    @Param('postID') postID: string,
     @Body() inputModel: PostsLikesInputModel,
     @Req() req: any,
   ) {
+    const isPostExist = await this.postsService.isPostExist(postID);
+    if (!isPostExist) throw new NotFoundException();
+
     const authHeader = req.header('authorization')?.split(' ');
     const token = new AccessTokenService(
       tokenServiceCommands.set,
       authHeader[1],
     );
+
     const userId = token.decode().userId;
-    await this.postsLikesService.updateLike(userId, id, inputModel);
+    await this.postsLikesService.updateLike(userId, postID, inputModel);
 
-    return;
-  }
-
-  @Delete(':id')
-  @UseGuards(AdminAuthGuard)
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteById(@Param('id') id: string) {
-    await this.postsService.deletePost(id);
     return;
   }
 }

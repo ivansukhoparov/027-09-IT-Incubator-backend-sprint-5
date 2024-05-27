@@ -59,8 +59,8 @@ export class CommentsQueryRepository {
 
       return {
         pagesCount: pagesCount,
-        page: sortData.pageNumber,
-        pageSize: sortData.pageSize,
+        page: +sortData.pageNumber,
+        pageSize: +sortData.pageSize,
         totalCount: commentsCount,
         items: mappedComments,
       };

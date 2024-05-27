@@ -1,18 +1,43 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import { InjectModel, Prop } from '@nestjs/mongoose';
 import { Blog, BlogDocument } from './blogs.schema';
 import { ObjectId } from 'mongodb';
 import { Model } from 'mongoose';
 import { blogMapper } from '../types/mapper';
 import { BlogUpdateDto } from '../types/input';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class BlogsRepository {
-  constructor(@InjectModel(Blog.name) private blogModel: Model<Blog>) {}
+  constructor(
+    @InjectModel(Blog.name) private blogModel: Model<Blog>,
+    @InjectDataSource() protected dataSource: DataSource,
+  ) {}
 
   async createBlog(newBlog: Blog) {
-    const result = await this.blogModel.create(newBlog);
-    return result._id.toString();
+    try {
+      const createdBlog = await this.dataSource.query(
+        `
+      INSERT INTO "Blogs"
+      ("name", "description", "websiteUrl", "createdAt", "isMembership")
+      VALUES $1,$2,$3,$4,$5
+      RETURNING id
+      `,
+        [
+          newBlog.name,
+          newBlog.description,
+          newBlog.websiteUrl,
+          newBlog.createdAt,
+          newBlog.isMembership,
+        ],
+      );
+      return createdBlog[0].id;
+    } catch {
+      throw new NotFoundException();
+    }
+    // const result = await this.blogModel.create(newBlog);
+    // return result._id.toString();
   }
 
   async getAllBlogs() {

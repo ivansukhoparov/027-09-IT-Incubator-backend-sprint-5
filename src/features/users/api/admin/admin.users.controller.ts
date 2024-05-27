@@ -20,7 +20,6 @@ import { DeleteUserCommand } from '../../use.cases/delete.user.use.case';
 import { GetAllUsersQuery } from '../../use.cases/get.all.users.use.case';
 import { UsersQueryRepository } from '../../infrastructure/users.query.repository';
 import { UsersRepository } from '../../infrastructure/users.repository';
-import { createQuery, createQueryS } from '../../../common/create.query';
 
 @Controller('sa/users')
 export class AdminUsersController {

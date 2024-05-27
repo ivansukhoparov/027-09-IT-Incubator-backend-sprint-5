@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CommentsController } from './comments/api/comments.controller';
-import { BlogsController } from './blogs/api/blogs.controller';
+import { AdminBlogsController } from './blogs/api/admin/admin.blogs.controller';
 import { PostsController } from './posts/api/posts.controller';
 import { BlogsService } from './blogs/application/blogs.service';
 import { PostsService } from './posts/application/posts.service';
@@ -32,8 +32,14 @@ import {
 } from './likes/infrastructure/likes.schema';
 import { IsBlogExistConstraint } from '../../infrastructure/decorators/validate/is.blog.exist';
 import { UsersModule } from '../users/users.module';
+import { PublicBlogsController } from './blogs/api/public/public.blogs.controller';
 
-const controllers = [BlogsController, PostsController, CommentsController];
+const controllers = [
+  AdminBlogsController,
+  PublicBlogsController,
+  PostsController,
+  CommentsController,
+];
 
 const services = [
   BlogsService,

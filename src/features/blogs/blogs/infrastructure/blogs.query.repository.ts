@@ -5,10 +5,15 @@ import { Model } from 'mongoose';
 import { BlogOutputDto } from '../types/output';
 import { blogMapper } from '../types/mapper';
 import { QuerySearchType, QuerySortType } from '../../../common/types';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class BlogsQueryRepository {
-  constructor(@InjectModel(Blog.name) private blogModel: Model<BlogDocument>) {}
+  constructor(
+    @InjectModel(Blog.name) private blogModel: Model<BlogDocument>,
+    @InjectDataSource() protected dataSource: DataSource,
+  ) {}
 
   async getAllBlogs(sortData: QuerySortType, searchData: QuerySearchType) {
     let searchKey = {};

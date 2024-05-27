@@ -13,21 +13,25 @@ export class PostsLikesRepository {
   ) {}
 
   async update(updateModel: PostsLikes) {
-    const post = await this.postsModel.findOne({
-      _id: new ObjectId(updateModel.postId),
-    });
-    if (!post) throw new NotFoundException();
-    const like = await this.postsLikesModel.findOne({
-      $and: [
-        { likeOwnerId: updateModel.likeOwnerId },
-        { postId: updateModel.postId },
-      ],
-    });
-    if (like) {
-      like.status = updateModel.status;
-      like.save();
-    } else {
-      await this.postsLikesModel.create(updateModel);
+    try {
+      const post = await this.postsModel.findOne({
+        _id: new ObjectId(updateModel.postId),
+      });
+      if (!post) throw new NotFoundException();
+      const like = await this.postsLikesModel.findOne({
+        $and: [
+          { likeOwnerId: updateModel.likeOwnerId },
+          { postId: updateModel.postId },
+        ],
+      });
+      if (like) {
+        like.status = updateModel.status;
+        like.save();
+      } else {
+        await this.postsLikesModel.create(updateModel);
+      }
+    } catch {
+      throw NotFoundException;
     }
   }
 }

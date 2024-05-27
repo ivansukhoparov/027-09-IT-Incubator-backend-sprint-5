@@ -1,5 +1,5 @@
 import { IS_URL, IsUrl } from 'class-validator';
-import { IsStringLength } from '../../../../../infrastructure/decorators/validate/is.string.length';
+import { IsStringLength } from '../../../../../../infrastructure/decorators/validate/is.string.length';
 
 export class CreateBlogInputModel {
   @IsStringLength(0, 15)

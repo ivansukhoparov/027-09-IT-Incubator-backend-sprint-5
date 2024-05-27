@@ -5,7 +5,7 @@ import { blogMapper } from '../types/mapper';
 import {
   CreateBlogInputModel,
   UpdateBlogInputModel,
-} from '../api/models/blogs.input.models';
+} from '../api/admin/models/blogs.input.models';
 
 @Injectable()
 export class BlogsService {

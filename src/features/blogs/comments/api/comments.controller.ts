@@ -12,6 +12,7 @@ import {
   HttpCode,
   UnauthorizedException,
   ForbiddenException,
+  NotFoundException,
 } from '@nestjs/common';
 import { CommentsQueryRepository } from '../infrastructure/comments.query.repository';
 import { Request } from 'express';
@@ -93,21 +94,23 @@ export class CommentsController {
     return;
   }
 
-  @Put(':id/like-status')
+  @Put(':commentId/like-status')
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateLikeStatus(
-    @Param('id') id: string,
+    @Param('commentId') commentId: string,
     @Body() inputModel: CommentsLikesInputModel,
     @Req() req: any,
   ) {
+    const isCommentExist = await this.commentsService.isCommentExist(commentId);
+    if (!isCommentExist) throw new NotFoundException();
     const authHeader = req.header('authorization')?.split(' ');
     const token = new AccessTokenService(
       tokenServiceCommands.set,
       authHeader[1],
     );
     const userId = token.decode().userId;
-    await this.commentsLikesService.updateLike(userId, id, inputModel);
+    await this.commentsLikesService.updateLike(userId, commentId, inputModel);
 
     return;
   }

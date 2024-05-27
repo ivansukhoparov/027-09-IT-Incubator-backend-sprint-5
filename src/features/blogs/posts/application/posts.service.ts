@@ -7,6 +7,7 @@ import {
   CreatePostInputModel,
   UpdatePostInputModel,
 } from '../api/models/posts.input.models';
+import { PostUpdateDto } from '../types/input';
 
 @Injectable()
 export class PostsService {
@@ -41,11 +42,24 @@ export class PostsService {
     return newPostId;
   }
 
-  async updatePost(id: string, updateDto: UpdatePostInputModel) {
-    await this.postsRepository.updatePost(id, updateDto);
+  async updatePost(
+    postId: string,
+    updateDto: UpdatePostInputModel,
+    blogId: string,
+  ) {
+    const postDto = {
+      ...updateDto,
+      blogId: blogId,
+    };
+
+    await this.postsRepository.updatePost(postId, postDto);
   }
 
   async deletePost(id: string) {
     await this.postsRepository.deletePost(id);
+  }
+
+  async isPostExist(id: string) {
+    return await this.postsRepository.isPostExist(id);
   }
 }

@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { Post, PostDocument } from './posts.schema';
 import { PostUpdateDto } from '../types/input';
+import { BlogDocument } from '../../blogs/infrastructure/blogs.schema';
 
 @Injectable()
 export class PostsRepository {
@@ -46,6 +47,15 @@ export class PostsRepository {
       if (result.deletedCount !== 1) throw new NotFoundException();
     } catch {
       throw new NotFoundException();
+    }
+  }
+
+  async isPostExist(id: string) {
+    try {
+      const blog: BlogDocument = await this.postModel.findById(id);
+      return !!blog;
+    } catch {
+      return false;
     }
   }
 }

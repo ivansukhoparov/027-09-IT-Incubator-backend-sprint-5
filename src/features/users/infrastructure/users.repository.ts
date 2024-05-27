@@ -41,6 +41,7 @@ export class UsersRepository implements IUsersRepository {
         `,
         [id],
       );
+
       return result[0];
     } catch {
       throw new NotFoundException();
