@@ -1,7 +1,6 @@
-import { BlogOutputDto } from '../../src/features/blogs/types/output';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { PostOutputDto } from '../../src/features/posts/types/output';
+import { PostOutputDto } from '../../src/features/blogs/posts/types/output';
 
 export class PostsTestManager {
   private endPoint: string = '/posts/';

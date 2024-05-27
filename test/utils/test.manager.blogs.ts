@@ -1,6 +1,6 @@
-import { BlogOutputDto } from '../../src/features/blogs/types/output';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
+import { BlogOutputDto } from '../../src/features/blogs/blogs/types/output';
 
 export class BlogsTestManager {
   constructor(

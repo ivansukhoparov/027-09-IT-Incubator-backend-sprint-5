@@ -1,17 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 
-import { HttpCode, HttpStatus, INestApplication } from '@nestjs/common';
 import mongoose from 'mongoose';
 import { appSettings } from '../src/settings/app.settings';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BlogsTestManager } from './utils/test.manager.blogs';
 import { blogsDataset } from './datasets/blogs.dataset';
 import { TestViewModel } from './datasets/view.model';
-import { BlogOutputDto } from '../src/features/blogs/types/output';
+
 import { PostsTestManager } from './utils/test.manager.posts';
 import { PostsDataset } from './datasets/posts.dataset';
-import { PostOutputDto } from '../src/features/posts/types/output';
+import { HttpStatus, INestApplication } from '@nestjs/common';
+import { PostOutputDto } from '../src/features/blogs/posts/types/output';
 
 const db =
   appSettings.api.MONGO_CONNECTION_URI + '/' + appSettings.api.MONGO_DB_NAME;
