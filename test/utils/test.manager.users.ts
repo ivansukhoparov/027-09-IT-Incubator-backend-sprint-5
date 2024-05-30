@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { UserOutputModel } from '../../src/features/users/api/admin/models/user.ouput.model';
-import { CreateUserDto } from '../datasets/users.dataset';
+import { CreateUserModel } from '../datasets/users.dataset';
 
 export class UsersTestManager {
   private endPoint: string = '/sa/users/';
@@ -25,7 +25,7 @@ export class UsersTestManager {
     const users: Array<UserOutputModel> = [];
 
     for (let i = 1; i <= numberOfEntities; i++) {
-      const createModel = new CreateUserDto(i);
+      const createModel = new CreateUserModel(i);
       const res = await this.createOne(createModel);
       users.push(res.body);
     }
