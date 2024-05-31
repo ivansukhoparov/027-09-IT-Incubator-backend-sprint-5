@@ -31,6 +31,7 @@ export class AdminUsersController {
   ) {}
 
   @Get()
+  @UseGuards(AdminAuthGuard)
   async getAll(@Query() query: QueryUsersRequestType) {
     // const { sortData, searchData } = createQueryS(query);
     // return await this.usersQueryRepository.getAllUsers(sortData, searchData);
@@ -40,6 +41,7 @@ export class AdminUsersController {
   }
 
   @Get(':id')
+  @UseGuards(AdminAuthGuard)
   async getById(@Param('id') id: string) {
     return await this.usersQueryRepository.getById(id);
   }
