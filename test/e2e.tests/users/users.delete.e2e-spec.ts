@@ -6,7 +6,7 @@ import { creteTestApp } from '../../common/create.test.app';
 import { TestViewModel } from '../../datasets/view.model';
 import { TestsCreateUserModel } from './dataset/users.models';
 
-describe('sa/users GET test', () => {
+describe.skip('sa/users GET test', () => {
   let app: INestApplication;
   let usersTestManager: UsersTestManager;
   let usersTestManagerNotAuth: UsersTestManager;

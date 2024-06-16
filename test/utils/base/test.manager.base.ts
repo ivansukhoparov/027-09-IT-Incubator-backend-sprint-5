@@ -1,19 +1,14 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-
-export interface ITestsCreateModel {
-  extendModel(counter: string | number): void;
-}
+import { ITestsCreateModel } from './tests.create.model.interface';
+import { credentialsType } from '../../common/tests.settings';
 
 export abstract class TestManagerBase<EntityOutputModel> {
-  protected constructor(
+  constructor(
     protected readonly app: INestApplication,
-    private endPoint: string,
-    private createModel: ITestsCreateModel,
-    private accessData: any = {
-      user: 'admin',
-      password: 'qwerty',
-    },
+    protected accessData: credentialsType,
+    protected createModel: ITestsCreateModel,
+    protected endPoint: string,
   ) {}
 
   async createOne(createModel: any = this.createModel) {
@@ -34,23 +29,21 @@ export abstract class TestManagerBase<EntityOutputModel> {
     return users.reverse();
   };
 
-  async getOne(id: string) {
-    return await request(this.app.getHttpServer()).get(this.endPoint + id);
+  async get(addressExtender: string = '', queryString: string = '') {
+    return await request(this.app.getHttpServer()).get(
+      this.endPoint + addressExtender + queryString,
+    );
   }
 
-  async getAll(queryString?: string) {
-    if (queryString) {
-      return await request(this.app.getHttpServer()).get(
-        this.endPoint + queryString,
-      );
-    } else {
-      return await request(this.app.getHttpServer()).get(this.endPoint);
-    }
-  }
-
-  async deleteOne(id: string) {
+  async getWithAuth(addressExtender: string = '', queryString: string = '') {
     return await request(this.app.getHttpServer())
-      .delete(this.endPoint + id)
+      .get(this.endPoint + addressExtender + queryString)
+      .auth(this.accessData.user, this.accessData.password);
+  }
+
+  async delete(id: string) {
+    return await request(this.app.getHttpServer())
+      .delete(this.endPoint + '/' + id)
       .auth(this.accessData.user, this.accessData.password);
   }
 }
