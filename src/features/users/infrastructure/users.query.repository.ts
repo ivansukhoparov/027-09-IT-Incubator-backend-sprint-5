@@ -2,14 +2,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { IUsersQueryRepository } from './interfaces/users.query.repository.interface';
-import { UserOutputDto, UserOutputMeType } from '../types/output';
+import { UserOutputMeType } from '../types/output';
 import { QuerySortType, SearchType } from '../../common/types';
+import { UserOutputModel } from '../api/admin/models/user.ouput.model';
 
 @Injectable()
 export class UsersQueryRepository implements IUsersQueryRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async getById(id: string): Promise<UserOutputDto> {
+  async getById(id: string): Promise<UserOutputModel> {
     try {
       const result = await this.dataSource.query(
         `
@@ -51,7 +52,7 @@ export class UsersQueryRepository implements IUsersQueryRepository {
       if (searchArray.length > 0) {
         searchString = 'WHERE ' + searchArray.join(' OR ');
       } else {
-        searchString = `--'`;
+        searchString = ``;
       }
       const orderString = `"` + sortKey.sortBy + `" ` + sortKey.sortDirection;
       const result = await this.dataSource.query(
@@ -60,11 +61,21 @@ export class UsersQueryRepository implements IUsersQueryRepository {
                ${searchString}
              ORDER BY ${orderString}
              LIMIT ${pageSize} OFFSET ${skipped}
+
              `,
-        //,        [searchString, orderString, pageSize, skipped],
+
+        // `
+        //                  SELECT "id", "login", "email","createdAt" FROM "Users"
+        //                   $1
+        //                  ORDER BY $2
+        //                  LIMIT $3 OFFSET $4
+        //                  `,
+        // [searchString, orderString, pageSize, skipped],
       );
+      console.log(result);
       return result;
     } catch (err) {
+      console.log(err);
       throw new NotFoundException();
     }
   }
