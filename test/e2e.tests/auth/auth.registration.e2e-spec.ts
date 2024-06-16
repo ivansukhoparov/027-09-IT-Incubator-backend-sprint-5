@@ -33,7 +33,7 @@ describe('Auth tests', () => {
 
   beforeEach(async () => {});
 
-  it(`- POST request to auth/register should not create user if ONE OR MORE OF FIELDS TOO SHORT and return status 
+  it(`- POST request to auth/register should not create user if ONE OR MORE OF FIELDS DOESN'T SENT and return status 
   code 400 with errors array`, async () => {
     // With no login field
 
@@ -154,7 +154,7 @@ describe('Auth tests', () => {
 
   it(`+ POST request to auth/register with correct input model should create user and return status 204;
   use additional methods GET to sa/users`, async () => {
-    const registrationModel = new TestsRegistrationModel(1);
+    const registrationModel = new TestsRegistrationModel();
     await authTestManager.registration(registrationModel).then((res) => {
       expect(res.statusCode).toBe(HttpStatus.NO_CONTENT);
     });
@@ -164,12 +164,25 @@ describe('Auth tests', () => {
     expect(users.body.items[0].login).toBe(registrationModel.login);
   });
 
-  // it(`+ request to auth/login with correct credentials should login exist user and return access data with code 200,
-  // use additional methods create user`, async () => {
-  //   await usersTestManager
-  //     .createOne(new TestsRegistrationModel(1))
-  //     .then((res) => {
-  //       expect(res.statusCode).toBe(HttpStatus.CREATED);
-  //     });
-  // });
+  it(`- POST request to auth/register with correct input model should not to create user if the user with the
+  given login already exists and return error message status code  400;
+   use additional methods GET to sa/users`, async () => {
+    const registrationModel = new TestsRegistrationModel();
+    registrationModel.email = 'myelamil@maol.com';
+    await authTestManager.registration(registrationModel).then((res) => {
+      expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errorsResponse.getBody(['login']));
+    });
+  });
+
+  it(`- POST request to auth/register with correct input model should not to create user if the user with the
+  given email already exists and return error message status code  400;
+   use additional methods GET to sa/users`, async () => {
+    const registrationModel = new TestsRegistrationModel();
+    registrationModel.login = 'newLogin';
+    await authTestManager.registration(registrationModel).then((res) => {
+      expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errorsResponse.getBody(['email']));
+    });
+  });
 });
