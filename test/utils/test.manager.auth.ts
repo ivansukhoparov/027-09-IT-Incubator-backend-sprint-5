@@ -13,8 +13,8 @@ export class AuthTestManager {
 
   async getMeInfo(accessToken: string) {
     return await request(this.app.getHttpServer())
-      .set('authorization', accessToken)
-      .get(this.endPoint + '/login');
+      .get(this.endPoint + '/me')
+      .set('authorization', 'Bearer ' + accessToken);
   }
 
   async loginUser(
@@ -23,15 +23,23 @@ export class AuthTestManager {
     device: string = 'tests_device',
   ) {
     return await request(this.app.getHttpServer())
+      .post(this.endPoint + '/login')
       .set('user-agent', device)
       .set('Remote-Addr', ip)
-      .post(this.endPoint + '/login')
       .send(credentials);
   }
 
-  logoutUser() {}
+  async logoutUser(refreshToken: string) {
+    return await request(this.app.getHttpServer())
+      .post(this.endPoint + '/logout')
+      .set('Cookie', ['refreshToken=' + refreshToken]);
+  }
 
-  getNewRefreshToken() {}
+  async getNewRefreshToken(refreshToken: string) {
+    return await request(this.app.getHttpServer())
+      .post(this.endPoint + '/refresh-token')
+      .set('Cookie', ['refreshToken=' + refreshToken]);
+  }
 
   recoveryPassword() {}
 
