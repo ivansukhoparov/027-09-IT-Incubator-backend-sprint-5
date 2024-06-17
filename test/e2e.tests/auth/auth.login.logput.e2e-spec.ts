@@ -3,17 +3,10 @@ import request from 'supertest';
 import { UsersTestManager } from '../../utils/test.manager.users';
 import { creteTestApp } from '../../common/create.test.app';
 import { AuthTestManager } from '../../utils/test.manager.auth';
-import { createLengthString, ErrorsResponse } from '../../datasets/dataset';
-import {
-  authRegistrationModelNoLogin,
-  authRegistrationNoData,
-  authRegistrationNoEmail,
-  authRegistrationNoPassword,
-  TestsRegistrationModel,
-} from './datasets/auth.models';
 import { TestsCreateUserModel } from '../users/dataset/users.models';
 import { UserOutputModel } from '../../../src/features/users/api/admin/models/user.ouput.model';
-import { Response, Request } from 'express';
+import { appSettings } from '../../../src/settings/app.settings';
+import * as process from 'process';
 
 type UserTestType = UserOutputModel & {
   password?: string;
@@ -34,9 +27,14 @@ describe('Auth tests', () => {
   let app: INestApplication;
   let authTestManager: AuthTestManager;
   let usersTestManager: UsersTestManager;
-  const errorsResponse: ErrorsResponse = new ErrorsResponse();
 
   beforeAll(async () => {
+    // Use this to change tokens expiration tine
+    appSettings.api.ACCESS_TOKEN_EXPIRATION_TIME = '5s';
+    appSettings.api.REFRESH_TOKEN_EXPIRATION_TIME = '8s';
+    // appSettings.api.EMAIL_CONFIRMATION_EXPIRATION_TIME = "10s"
+    // appSettings.api.RECOVERY_TOKEN_EXPIRATION_TIME = "10s"
+
     app = await creteTestApp();
     authTestManager = new AuthTestManager(app);
     usersTestManager = new UsersTestManager(app);
@@ -111,13 +109,6 @@ describe('Auth tests', () => {
         user1.refreshToken = getRefreshTokenFromResponse(res);
       });
   });
-  it(`+ GET request to "me" endpoint with incorrect access token  should return code 401 `, async () => {
-    const invalidAccess =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3NjM5MzgyMS1jMTQzLTRkYjItYmMyZi00NzI3OTlhYTBjN2IiLCJpYXQiOjE3MTg1Nzk4NzAsImV4cCI6MTcxODU4MDE3MH0._DyFvZjICJgLCRGiJSnNHojr_0BTt67SqHSboRAJjTI';
-    await authTestManager.getMeInfo(invalidAccess).then((res) => {
-      expect(res.statusCode).toBe(HttpStatus.UNAUTHORIZED);
-    });
-  });
 
   it(`+ GET request to "me" endpoint for user 1 should  return correct user info with code 200 `, async () => {
     await authTestManager.getMeInfo(user1.accessToken).then((res) => {
@@ -127,6 +118,22 @@ describe('Auth tests', () => {
         login: user1.login,
         userId: user1.id,
       });
+    });
+  });
+
+  it(`+ GET request to "me" endpoint for user 1 should code 401 after 10 sec awaiting`, async () => {
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+
+    await authTestManager.getMeInfo(user1.accessToken).then((res) => {
+      expect(res.statusCode).toBe(HttpStatus.UNAUTHORIZED);
+    });
+  });
+
+  it(`+ GET request to "me" endpoint with incorrect access token  should return code 401 `, async () => {
+    const invalidAccess =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3NjM5MzgyMS1jMTQzLTRkYjItYmMyZi00NzI3OTlhYTBjN2IiLCJpYXQiOjE3MTg1Nzk4NzAsImV4cCI6MTcxODU4MDE3MH0._DyFvZjICJgLCRGiJSnNHojr_0BTt67SqHSboRAJjTI';
+    await authTestManager.getMeInfo(invalidAccess).then((res) => {
+      expect(res.statusCode).toBe(HttpStatus.UNAUTHORIZED);
     });
   });
 
@@ -159,12 +166,40 @@ describe('Auth tests', () => {
       });
   });
 
-  it(`+ POST request to "logout" endpoint for user 1 should  return status code 204;
-     shouldnt return new access token with code 401 `, async () => {
-    await authTestManager.logoutUser(user1.refreshToken).then((res) => {
+  it(`+ POST request to "refresh-token" endpoint with correct refresh token should return code 401 if token has been expired `, async () => {
+    await new Promise((resolve) => setTimeout(resolve, 8000));
+
+    await authTestManager.getNewRefreshToken(user1.refreshToken).then((res) => {
+      expect(res.statusCode).toBe(HttpStatus.UNAUTHORIZED);
+    });
+  });
+
+  it(`+ POST request to "login" endpoint should login user_2 with correct credentials, 
+  and return code 200, access token in body and refresh token in cookies`, async () => {
+    await authTestManager
+      .loginUser({
+        loginOrEmail: user2.login,
+        password: 'string',
+      })
+      .then((res) => {
+        expect(res.statusCode).toBe(HttpStatus.OK);
+        expect(res.body).toEqual({ accessToken: expect.any(String) });
+        expect(getRefreshTokenFromResponse(res)).not.toBeUndefined();
+        expect(getRefreshTokenFromResponse(res)).toEqual(expect.any(String));
+        user2.accessToken = res.body.accessToken;
+        user2.refreshToken = getRefreshTokenFromResponse(res);
+      });
+  });
+
+  it(`+ POST request to "logout" endpoint for user 2 should  return status code 204;
+     shouldnt return new access token just code 401 `, async () => {
+    await authTestManager.logoutUser(user2.refreshToken).then((res) => {
       expect(res.statusCode).toBe(HttpStatus.NO_CONTENT);
     });
-    await authTestManager.getNewRefreshToken(user1.refreshToken).then((res) => {
+  });
+
+  it(`- POST request to "refresh-token" endpoint with correct refresh token shouldnt return new pair after login `, async () => {
+    await authTestManager.getNewRefreshToken(user2.refreshToken).then((res) => {
       expect(res.statusCode).toBe(HttpStatus.UNAUTHORIZED);
     });
   });
