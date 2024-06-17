@@ -208,8 +208,9 @@ export class AuthService {
     const isInBlackList =
       await this.refreshTokenRepository.findInBlackList(oldRefreshToken);
 
-    if (!refreshToken.verify() || isInBlackList)
+    if (!refreshToken.verify() || isInBlackList) {
       throw new UnauthorizedException();
+    }
 
     const currentDeviceId = refreshToken.decode().deviceId;
     await this.refreshTokenRepository.addToBlackList(oldRefreshToken);

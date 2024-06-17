@@ -86,8 +86,10 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     try {
+      const oldRefreshToken = req.headers['cookie'].split('=')[1];
+      // const oldRefreshToken = req.cookies.refreshToken;
       const { accessToken, refreshToken } =
-        await this.authService.refreshTokens(req.cookies.refreshToken);
+        await this.authService.refreshTokens(oldRefreshToken);
       res.cookie('refreshToken', refreshToken.get(), {
         httpOnly: true,
         secure: true,
@@ -118,6 +120,7 @@ export class AuthController {
       httpOnly: true,
       secure: true,
     });
+    // console.log(refreshToken);
     return accessToken.getModel();
   }
 
@@ -126,9 +129,12 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(@Req() req: Request) {
     try {
-      await this.authService.logout(req.cookies.refreshToken);
+      const refreshToken = req.headers['cookie'].split('=')[1];
+      // const refreshToken = req.cookies.refreshToken;
+      await this.authService.logout(refreshToken);
       return;
-    } catch {
+    } catch (err) {
+      console.log('error from controllrs', err);
       throw new UnauthorizedException();
     }
   }
