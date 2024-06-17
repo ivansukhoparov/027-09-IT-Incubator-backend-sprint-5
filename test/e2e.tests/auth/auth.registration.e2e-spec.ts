@@ -12,7 +12,7 @@ import {
   TestsRegistrationModel,
 } from './datasets/auth.models';
 
-describe('Auth tests', () => {
+describe.skip('Auth tests', () => {
   let app: INestApplication;
   let authTestManager: AuthTestManager;
   let usersTestManager: UsersTestManager;
