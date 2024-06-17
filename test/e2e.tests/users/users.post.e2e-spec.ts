@@ -145,7 +145,7 @@ describe.skip('sa/users POST test', () => {
       });
   });
 
-  it('+ POST request should create user and new user with status code 201', async () => {
+  it('+ POST request should create user and return new user with status code 201', async () => {
     await usersTestManager
       .createOne(new TestsCreateUserModel(1))
       .then((res) => {
