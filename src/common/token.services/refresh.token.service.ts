@@ -1,26 +1,13 @@
 import { appSettings } from '../../settings/app.settings';
 import { JwtPayload } from 'jsonwebtoken';
 import { BaseToken } from '../../base/base.classes/base.token';
-import {
-  RefreshTokenDecodedDto,
-  RefreshTokenPayloadDto,
-} from './types/refresh.token';
-import {
-  createTokenStatusesKeysType,
-  tokenServiceCommands,
-} from './utils/common';
+import { RefreshTokenDecodedDto } from './types/refresh.token';
+import { Injectable } from '@nestjs/common';
 
-export class RefreshTokenService extends BaseToken<
-  RefreshTokenPayloadDto,
-  RefreshTokenDecodedDto
-> {
-  constructor(
-    status: createTokenStatusesKeysType = tokenServiceCommands.empty,
-    payload: RefreshTokenPayloadDto | string | null = null,
-  ) {
+@Injectable()
+export class RefreshTokenService extends BaseToken<RefreshTokenDecodedDto> {
+  constructor() {
     super(
-      status,
-      payload,
       appSettings.api.JWT_SECRET_KEY,
       appSettings.api.REFRESH_TOKEN_EXPIRATION_TIME,
     );

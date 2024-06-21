@@ -1,28 +1,14 @@
 import { appSettings } from '../../settings/app.settings';
 import { JwtPayload } from 'jsonwebtoken';
 import { BaseToken } from '../../base/base.classes/base.token';
-import {
-  AccessTokenDecodedDto,
-  AccessTokenPayloadDto,
-} from './types/access.token';
-import {
-  createTokenStatusesKeysType,
-  tokenModel,
-  tokenServiceCommands,
-} from './utils/common';
-import { ConfirmationCodePayload } from './types/email.confirmation.code';
+import { AccessTokenDecodedDto } from './types/access.token';
+import { tokenModel } from './types/common';
+import { Injectable } from '@nestjs/common';
 
-export class AccessTokenService extends BaseToken<
-  AccessTokenPayloadDto,
-  AccessTokenDecodedDto
-> {
-  constructor(
-    status: createTokenStatusesKeysType = tokenServiceCommands.empty,
-    payload: AccessTokenPayloadDto | string | null = null,
-  ) {
+@Injectable()
+export class AccessTokenService extends BaseToken<AccessTokenDecodedDto> {
+  constructor() {
     super(
-      status,
-      payload,
       appSettings.api.JWT_SECRET_KEY,
       appSettings.api.ACCESS_TOKEN_EXPIRATION_TIME,
     );
