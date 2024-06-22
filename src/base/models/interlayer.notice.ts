@@ -22,3 +22,12 @@ export class InterlayerNotice<D = null> {
     return this.code !== 0;
   }
 }
+
+export const ERRORS_CODES = {
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  EMAIL_SEND_ERROR: 1001,
+  ALREADY_CONFIRMED: 1002,
+  INVALID_TOKEN: 1003,
+  DATA_BASE_ERROR: 1004,
+};
