@@ -1,11 +1,5 @@
 import { UserConfirmationCodeDto } from '../types/input';
-import {
-  BadRequestException,
-  HttpException,
-  HttpStatus,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../../../users/application/users.service';
 import { EmailService } from '../../../../common/email/email.service';
 import { BcryptAdapter } from '../../../../common/adapters/bcrypt.adapter';
@@ -18,6 +12,8 @@ import { SessionInputModel } from '../../devices/api/models/session.input.models
 import { UserDocument } from '../../../users/infrastructure/users.schema';
 import { DevicesService } from '../../devices/application/devices.service';
 import { AccessToken } from '../../../../common/token.services/access-token.service';
+import { ERRORS_CODES, InterlayerNotice } from '../../../../base/models/interlayer.notice';
+import { TokenPair } from '../types/output';
 
 @Injectable()
 export class AuthService {
@@ -32,125 +28,107 @@ export class AuthService {
     protected devicesService: DevicesService,
   ) {}
 
-  async registerUser(registrationDto: UserCreateInputModel) {
-    let user = await this.userService.getUserByLoginOrEmail(
-      registrationDto.login,
-    );
+  async registerUser(registrationDto: UserCreateInputModel): Promise<InterlayerNotice<boolean>> {
+    const interlayerNotice: InterlayerNotice<boolean> = new InterlayerNotice<boolean>();
+    let user = await this.userService.getUserByLoginOrEmail(registrationDto.login);
 
-    // TODO fix it - change to native Error
-    if (user)
-      throw new BadRequestException({
-        errorsMessages: [
-          {
-            message: 'invalid field',
-            field: 'login',
-          },
-        ],
-      });
+    if (user) {
+      interlayerNotice.addError('Login already exist', 'login', ERRORS_CODES.BAD_REQUEST);
+      return interlayerNotice;
+    }
+
     user = await this.userService.getUserByLoginOrEmail(registrationDto.email);
-    // TODO fix it - change to native Error
-    if (user)
-      throw new BadRequestException({
-        errorsMessages: [
-          {
-            message: 'invalid field',
-            field: 'email',
-          },
-        ],
-      });
 
+    if (user) {
+      interlayerNotice.addError('Email already exist', 'email', ERRORS_CODES.BAD_REQUEST);
+      return interlayerNotice;
+    }
     const createdUserId = await this.userService.create(registrationDto, false);
     const createdUser = await this.userService.getUserById(createdUserId);
-    if (!createdUser) return false;
+    if (!createdUser) {
+      interlayerNotice.addError('Something wrong', 'server', ERRORS_CODES.EMAIL_SEND_ERROR);
+      return interlayerNotice;
+      // return false;
+    }
 
     const emailConfirmationCode = this.confirmationCode.create({
       email: createdUser.email,
     });
 
-    const isEmailSent = await this.emailService.sendEmailConfirmationEmail(
-      createdUser,
-      emailConfirmationCode,
-    );
-
-    if (!isEmailSent) {
-      await this.userService.delete(createdUser.id);
-      return false;
-    }
-
-    return true;
+    return await this.emailService.sendEmailConfirmationEmail(createdUser, emailConfirmationCode);
   }
 
-  async resendConfirmationCode(email: UserEmailDto) {
+  async resendConfirmationCode(email: UserEmailDto): Promise<InterlayerNotice<boolean>> {
+    const interlayerNotice: InterlayerNotice<boolean> = new InterlayerNotice<boolean>();
     const user = await this.userService.getUserByLoginOrEmail(email.email);
-    // TODO fix it - change to native Error
-    if (!user || user.isConfirmed)
-      throw new BadRequestException({
-        errorsMessages: [
-          {
-            message: 'email exist',
-            field: 'email',
-          },
-        ],
-      });
+
+    if (!user) {
+      interlayerNotice.addError('Email not found', 'email', ERRORS_CODES.BAD_REQUEST);
+      return interlayerNotice;
+    }
+
+    if (user.isConfirmed) {
+      interlayerNotice.addError('User already confirmed', 'confirmation', ERRORS_CODES.ALREADY_CONFIRMED);
+      return interlayerNotice;
+    }
 
     const emailConfirmationCode = this.confirmationCode.create({
       email: user.email,
     });
 
-    return await this.emailService.sendEmailConfirmationEmail(
-      user,
-      emailConfirmationCode,
-    );
+    return await this.emailService.sendEmailConfirmationEmail(user, emailConfirmationCode);
   }
 
-  async confirmEmail(confirmationCode: UserConfirmationCodeDto) {
-    const refreshTokenPayload = this.confirmationCode.decode(
-      confirmationCode.code,
-    );
+  async confirmEmail(confirmationCode: UserConfirmationCodeDto): Promise<InterlayerNotice<boolean>> {
+    const interlayerNotice: InterlayerNotice<boolean> = new InterlayerNotice<boolean>();
+    const confirmationCodePayload = this.confirmationCode.decode(confirmationCode.code);
 
-    // TODO fix it - change to native Error
-    if (!refreshTokenPayload)
-      throw new BadRequestException({
-        errorsMessages: [
-          {
-            message: 'email exist',
-            field: 'code',
-          },
-        ],
-      });
+    if (!confirmationCodePayload) {
+      interlayerNotice.addError('Invalid confirmation code', 'code', ERRORS_CODES.ALREADY_CONFIRMED);
+      return interlayerNotice;
+    }
 
-    const user = await this.userService.getUserByLoginOrEmail(
-      refreshTokenPayload.email,
-    );
+    const user = await this.userService.getUserByLoginOrEmail(confirmationCodePayload.email);
 
-    // TODO fix it - change to native Error
-    if (!user || user.isConfirmed)
-      throw new BadRequestException({
-        errorsMessages: [
-          {
-            message: 'email exist',
-            field: 'code',
-          },
-        ],
-      });
+    if (!user) {
+      interlayerNotice.addError('Email not found', 'email', ERRORS_CODES.BAD_REQUEST);
+      return interlayerNotice;
+    }
 
-    return await this.userService.updateUserConfirmationStatus(user.id);
+    if (user.isConfirmed) {
+      interlayerNotice.addError('User already confirmed', 'confirmation', ERRORS_CODES.ALREADY_CONFIRMED);
+      return interlayerNotice;
+    }
+
+    // TODO rewrite using InterlayerNotice()
+    const isStatusUpdated = await this.userService.updateUserConfirmationStatus(user.id);
+
+    if (!isStatusUpdated) {
+      interlayerNotice.addError('Can not update status', 'db', ERRORS_CODES.DATA_BASE_ERROR);
+      return interlayerNotice;
+    }
+    interlayerNotice.addData(true);
+    return interlayerNotice;
   }
 
-  async refreshTokens(oldRefreshToken: string) {
-    const isInBlackList =
-      await this.refreshTokenRepository.findInBlackList(oldRefreshToken);
-
+  async refreshTokens(oldRefreshToken: string): Promise<InterlayerNotice<TokenPair>> {
+    const interlayerNotice: InterlayerNotice<TokenPair> = new InterlayerNotice<TokenPair>();
+    const isInBlackList = await this.refreshTokenRepository.findInBlackList(oldRefreshToken);
     const refreshTokenPayload = this.refreshToken.decode(oldRefreshToken);
-    if (!refreshTokenPayload || isInBlackList)
-      throw new UnauthorizedException();
+
+    if (!refreshTokenPayload || isInBlackList) {
+      interlayerNotice.addError('Refresh token not valid', 'refreshToken', ERRORS_CODES.INVALID_TOKEN);
+      return interlayerNotice;
+    }
 
     await this.refreshTokenRepository.addToBlackList(oldRefreshToken);
 
     const deviceId = refreshTokenPayload.deviceId;
     const userId = refreshTokenPayload.userId;
 
-    return await this.devicesService.updateSession(userId, deviceId);
+    const tokenPair: TokenPair = await this.devicesService.updateSession(userId, deviceId);
+    interlayerNotice.addData(tokenPair);
+    return interlayerNotice;
   }
 
   // async passwordRecoveryCode(email: string) {
@@ -180,41 +158,41 @@ export class AuthService {
   //
   // }
 
-  async loginUser(
-    loginDto: LoginInputModel,
-    sessionInputModel: SessionInputModel,
-  ) {
-    const user: UserDocument = await this.userService.getUserByLoginOrEmail(
-      loginDto.loginOrEmail,
-    );
-    if (!user)
-      throw new HttpException('Bad login or password', HttpStatus.UNAUTHORIZED);
+  async loginUser(loginDto: LoginInputModel, sessionInputModel: SessionInputModel): Promise<InterlayerNotice<TokenPair>> {
+    const interlayerNotice: InterlayerNotice<TokenPair> = new InterlayerNotice<TokenPair>();
+    const user = await this.userService.getUserByLoginOrEmail(loginDto.loginOrEmail);
 
-    const isSuccess = await this.cryptAdapter.compareHash(
-      loginDto.password,
-      user.hash,
-    );
-    if (!isSuccess)
-      throw new HttpException('Bad login or password', HttpStatus.UNAUTHORIZED);
+    if (!user) {
+      interlayerNotice.addError('Bad login or password', 'credentials', ERRORS_CODES.UNAUTHORIZED);
+      return interlayerNotice;
+    }
 
-    return await this.devicesService.createSession(sessionInputModel, user);
+    const isSuccess = await this.cryptAdapter.compareHash(loginDto.password, user.hash);
+    if (!isSuccess) {
+      interlayerNotice.addError('Bad login or password', 'credentials', ERRORS_CODES.UNAUTHORIZED);
+      return interlayerNotice;
+    }
+
+    const tokenPair: TokenPair = await this.devicesService.createSession(sessionInputModel, user);
+    interlayerNotice.addData(tokenPair);
+    return interlayerNotice;
   }
 
-  async logout(oldRefreshToken: string) {
-    const isInBlackList =
-      await this.refreshTokenRepository.findInBlackList(oldRefreshToken);
-
+  async logout(oldRefreshToken: string): Promise<InterlayerNotice<boolean>> {
+    const interlayerNotice: InterlayerNotice<boolean> = new InterlayerNotice<boolean>();
+    const isInBlackList = await this.refreshTokenRepository.findInBlackList(oldRefreshToken);
     const refreshTokenPayload = this.refreshToken.decode(oldRefreshToken);
+
     if (!refreshTokenPayload || isInBlackList) {
-      console.log('in black list');
-      throw new UnauthorizedException();
+      interlayerNotice.addError('Refresh token not valid', 'refreshToken', ERRORS_CODES.INVALID_TOKEN);
+      return interlayerNotice;
     }
 
     const currentDeviceId = refreshTokenPayload.deviceId;
+
     await this.refreshTokenRepository.addToBlackList(oldRefreshToken);
-    await this.devicesService.terminateSession(
-      currentDeviceId,
-      oldRefreshToken,
-    );
+    await this.devicesService.terminateSession(currentDeviceId, oldRefreshToken);
+    interlayerNotice.addData(true);
+    return interlayerNotice;
   }
 }
