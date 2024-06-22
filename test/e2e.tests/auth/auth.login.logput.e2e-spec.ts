@@ -30,8 +30,8 @@ describe('Auth tests', () => {
 
   beforeAll(async () => {
     // Use this to change tokens expiration tine
-    appSettings.api.ACCESS_TOKEN_EXPIRATION_TIME = '5s';
-    appSettings.api.REFRESH_TOKEN_EXPIRATION_TIME = '8s';
+    appSettings.api.ACCESS_TOKEN_EXPIRATION_TIME = '50s';
+    appSettings.api.REFRESH_TOKEN_EXPIRATION_TIME = '80s';
     // appSettings.api.EMAIL_CONFIRMATION_EXPIRATION_TIME = "10s"
     // appSettings.api.RECOVERY_TOKEN_EXPIRATION_TIME = "10s"
 
