@@ -1,29 +1,24 @@
 import {
   Controller,
-  Delete,
   Get,
-  HttpCode,
-  HttpStatus,
   NotFoundException,
   Param,
   Query,
   Req,
-  UseGuards,
 } from '@nestjs/common';
 import { BlogsQueryRepository } from '../../infrastructure/blogs.query.repository';
 import { PostsQueryRepository } from '../../../posts/infrastructure/posts.query.repository';
 import { Request } from 'express';
 import { QueryUsersRequestType } from '../../../../users/types/input';
 import { createQuery } from '../../../../common/create.query';
-import { AccessTokenService } from '../../../../../common/token.services/access.token.service';
-import { tokenServiceCommands } from '../../../../../common/token.services/utils/common';
-import { AdminAuthGuard } from '../../../../../infrastructure/guards/admin-auth-guard.service';
+import { AccessToken } from '../../../../../common/token.services/access-token.service';
 
 @Controller('blogs')
 export class PublicBlogsController {
   constructor(
-    protected blogsQueryRepository: BlogsQueryRepository,
-    protected postsQueryRepository: PostsQueryRepository,
+    protected readonly blogsQueryRepository: BlogsQueryRepository,
+    protected readonly postsQueryRepository: PostsQueryRepository,
+    protected readonly accessToken: AccessToken,
   ) {}
 
   @Get()
@@ -48,11 +43,8 @@ export class PublicBlogsController {
     try {
       try {
         const authHeader = req.header('authorization')?.split(' ');
-        const token = new AccessTokenService(
-          tokenServiceCommands.set,
-          authHeader[1],
-        );
-        const userId = token.decode().userId;
+        const accessTokenPayload = this.accessToken.decode(authHeader[1]);
+        const userId = accessTokenPayload.userId;
         return await this.postsQueryRepository.getAllPosts(
           sortData,
           blogId,

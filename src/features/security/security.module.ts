@@ -7,7 +7,6 @@ import { DevicesQueryRepository } from './devices/infrastructure/devices.query.r
 import { AuthService } from './auth/application/auth.service';
 import { RefreshTokenRepository } from './auth/infrastructure/refresh.token.repository';
 import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from '../users/infrastructure/users.schema';
 import {
   DevicesSchema,
   Session,
@@ -21,6 +20,17 @@ import { EmailService } from '../../common/email/email.service';
 import { NodemailerAdapter } from '../../common/adapters/nodemailer.adaper';
 import { JwtTokenAdapter } from '../../common/adapters/jwt.token.adapter';
 import { UsersModule } from '../users/users.module';
+import { RefreshToken } from '../../common/token.services/refresh-token.service';
+import { AccessToken } from '../../common/token.services/access-token.service';
+import { EmailConfirmationCode } from '../../common/token.services/email-confirmation-code.service';
+import { PasswordRecoveryToken } from '../../common/token.services/password-recovery-token.service';
+
+const tokenProviders = [
+  RefreshToken,
+  AccessToken,
+  EmailConfirmationCode,
+  PasswordRecoveryToken,
+];
 
 @Module({
   imports: [
@@ -38,6 +48,7 @@ import { UsersModule } from '../users/users.module';
   ],
   controllers: [AuthController, DevicesController],
   providers: [
+    ...tokenProviders,
     AuthService,
     DevicesService,
     DevicesRepository,
@@ -48,6 +59,11 @@ import { UsersModule } from '../users/users.module';
     NodemailerAdapter,
     JwtTokenAdapter,
   ],
-  exports: [],
+  exports: [
+    RefreshToken,
+    AccessToken,
+    EmailConfirmationCode,
+    PasswordRecoveryToken,
+  ],
 })
 export class SecurityModule {}

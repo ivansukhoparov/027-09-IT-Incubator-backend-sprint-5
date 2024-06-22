@@ -16,8 +16,8 @@ const mongoModule = MongooseModule.forRoot(
 
 const throttleModule = ThrottlerModule.forRoot([
   {
-    ttl: 100000,
-    limit: 5000,
+    ttl: 10000,
+    limit: 500,
   },
 ]);
 

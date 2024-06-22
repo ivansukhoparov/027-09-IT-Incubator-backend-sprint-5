@@ -30,6 +30,15 @@ export class UsersService {
     return this.usersRepository.getUserByLoginOrEmail(loginOrEmail);
   }
 
+  // ToDo: create flow that will find user in more then one field
+  // async getUserByFields(fields: Array<string>, value: string) {
+  //     const users:Array<User>
+  //   for (const field of fields) {
+  //
+  //     }
+  //     return this.usersRepository.getUserByLoginOrEmail(loginOrEmail);
+  // }
+
   async getUserById(id: string) {
     return this.usersRepository.getUserById(id);
   }

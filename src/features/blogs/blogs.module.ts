@@ -33,6 +33,7 @@ import {
 import { IsBlogExistConstraint } from '../../infrastructure/decorators/validate/is.blog.exist';
 import { UsersModule } from '../users/users.module';
 import { PublicBlogsController } from './blogs/api/public/public.blogs.controller';
+import { SecurityModule } from '../security/security.module';
 
 const controllers = [
   AdminBlogsController,
@@ -68,6 +69,7 @@ const queryRepositories = [
 const providers = [IsBlogExistConstraint];
 
 const mongooseImports = [
+  SecurityModule,
   MongooseModule.forFeature([
     {
       name: Blog.name,

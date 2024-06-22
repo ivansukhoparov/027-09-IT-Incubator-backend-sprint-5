@@ -1,8 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { DevicesRepository } from '../infrastructure/devices.repository';
 import uuid4 from 'uuid4';
-import { AccessTokenService } from '../../../../common/token.services/access.token.service';
-import { RefreshTokenService } from '../../../../common/token.services/refresh.token.service';
+import { AccessToken } from '../../../../common/token.services/access-token.service';
+import { RefreshToken } from '../../../../common/token.services/refresh-token.service';
 import { UserDocument } from '../../../users/infrastructure/users.schema';
 import { InterlayerNotice } from '../../../../base/models/interlayer.notice';
 import {
@@ -13,30 +13,35 @@ import {
 
 @Injectable()
 export class DevicesService {
-  constructor(protected sessionsRepository: DevicesRepository) {}
+  constructor(
+    protected sessionsRepository: DevicesRepository,
+    protected readonly accessToken: AccessToken,
+    protected readonly refreshToken: RefreshToken,
+  ) {}
 
   async createSession(
     sessionInputModel: SessionInputModel,
     user: UserDocument,
   ) {
     const deviceId = uuid4();
-    const accessToken = new AccessTokenService('create', {
+    const accessToken = this.accessToken.create({
       userId: user.id,
     });
-    const refreshToken = new RefreshTokenService('create', {
+    const refreshToken = this.refreshToken.create({
       userId: user.id,
       deviceId: deviceId,
     });
+    const refreshTokenPayload = this.refreshToken.decode(refreshToken);
 
     const sessionModel: SessionModel = {
       userId: user.id,
       deviceId: deviceId,
       deviceTitle: sessionInputModel.deviceTitle,
       ip: sessionInputModel.ip,
-      lastActiveDate: refreshToken.decode().iat,
+      lastActiveDate: refreshTokenPayload.iat,
       refreshToken: {
-        createdAt: refreshToken.decode().iat,
-        expiredAt: refreshToken.decode().exp,
+        createdAt: refreshTokenPayload.iat,
+        expiredAt: refreshTokenPayload.exp,
       },
     };
 
@@ -45,17 +50,20 @@ export class DevicesService {
   }
 
   async updateSession(UserId: string, deviceId: string) {
-    const accessToken = new AccessTokenService('create', { userId: UserId });
-    const refreshToken = new RefreshTokenService('create', {
+    const accessToken = this.accessToken.create({
+      userId: UserId,
+    });
+    const refreshToken = this.refreshToken.create({
       userId: UserId,
       deviceId: deviceId,
     });
+    const refreshTokenPayload = this.refreshToken.decode(refreshToken);
 
     const sessionUpdateModel: SessionUpdateModel = {
-      lastActiveDate: refreshToken.decode().iat,
+      lastActiveDate: refreshTokenPayload.iat,
       refreshToken: {
-        createdAt: refreshToken.decode().iat,
-        expiredAt: refreshToken.decode().exp,
+        createdAt: refreshTokenPayload.iat,
+        expiredAt: refreshTokenPayload.exp,
       },
     };
 
@@ -67,11 +75,11 @@ export class DevicesService {
   }
 
   async terminateSession(deviceId: string, refreshTokenValue: string) {
-    const refreshToken = new RefreshTokenService('set', refreshTokenValue);
+    const refreshTokenPayload = this.refreshToken.decode(refreshTokenValue);
 
-    if (!refreshToken.verify()) return new InterlayerNotice(null, 401);
+    if (!refreshTokenPayload) return new InterlayerNotice(null, 401);
 
-    const currentUserId = refreshToken.decode().userId;
+    const currentUserId = refreshTokenPayload.userId;
     const interlayerModel =
       await this.sessionsRepository.getSessionByDeviceId(deviceId);
 
@@ -87,11 +95,11 @@ export class DevicesService {
   }
 
   async terminateAllSessions(refreshTokenValue: string) {
-    const refreshToken = new RefreshTokenService('set', refreshTokenValue);
-    if (!refreshToken.verify()) throw new UnauthorizedException();
+    const refreshTokenPayload = this.refreshToken.decode(refreshTokenValue);
+    if (!refreshTokenPayload) throw new UnauthorizedException();
 
-    const currentUserId = refreshToken.decode().userId;
-    const currentSessionDeviceId = refreshToken.decode().deviceId;
+    const currentUserId = refreshTokenPayload.userId;
+    const currentSessionDeviceId = refreshTokenPayload.deviceId;
 
     await this.sessionsRepository.deleteSessionsExpectCurrent(
       currentUserId,

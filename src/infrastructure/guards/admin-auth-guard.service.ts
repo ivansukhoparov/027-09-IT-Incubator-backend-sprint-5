@@ -6,8 +6,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { AccessTokenService } from '../../common/token.services/access.token.service';
-import { tokenServiceCommands } from '../../common/token.services/utils/common';
+import { AccessToken } from '../../common/token.services/access-token.service';
 
 export const AUTH_METHODS = {
   base: 'Basic',
@@ -49,12 +48,9 @@ export class AuthGuard implements CanActivate {
       const request = context.switchToHttp().getRequest();
       const authHeader = request.header('authorization')?.split(' '); // Получаем значение поля в заголовке
       const authMethod = authHeader[0]; // получаем метод из заголовка
-      const token = new AccessTokenService(
-        tokenServiceCommands.set,
-        authHeader[1],
-      );
+      const token = new AccessToken();
 
-      if (token.verify() && authMethod === AUTH_METHODS.bearer) {
+      if (token.verify(authHeader[1]) && authMethod === AUTH_METHODS.bearer) {
         return true;
       } else {
         throw new HttpException(

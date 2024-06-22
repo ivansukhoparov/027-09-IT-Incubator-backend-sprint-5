@@ -1,28 +1,26 @@
+import { Injectable } from '@nestjs/common';
 import { appSettings } from '../../settings/app.settings';
 import { JwtPayload } from 'jsonwebtoken';
 import { BaseToken } from '../../base/base.classes/base.token';
-import { AccessTokenDecodedDto } from './types/access.token';
-import { tokenModel } from './types/common';
-import { Injectable } from '@nestjs/common';
+import { PasswordRecoveryTokenDecodedDto } from './types/password.recovery.token';
 
 @Injectable()
-export class AccessTokenService extends BaseToken<AccessTokenDecodedDto> {
+export class PasswordRecoveryToken extends BaseToken<PasswordRecoveryTokenDecodedDto> {
   constructor() {
     super(
       appSettings.api.JWT_SECRET_KEY,
-      appSettings.api.ACCESS_TOKEN_EXPIRATION_TIME,
+      appSettings.api.RECOVERY_TOKEN_EXPIRATION_TIME,
     );
   }
 
-  tokenMapper(decodedToken: JwtPayload): AccessTokenDecodedDto {
+  tokenMapper(decodedToken: JwtPayload): PasswordRecoveryTokenDecodedDto {
     return {
       userId: decodedToken.userId,
       iat: decodedToken.iat,
       exp: decodedToken.exp,
     };
   }
-
-  tokenModelMapper(token: string): tokenModel {
+  tokenModelMapper(token: string): any {
     return { accessToken: token };
   }
 }

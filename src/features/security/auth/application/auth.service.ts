@@ -1,8 +1,4 @@
-import {
-  UserConfirmationCodeDto,
-  UserLoginDto,
-  UserRegistrationDto,
-} from '../types/input';
+import { UserConfirmationCodeDto } from '../types/input';
 import {
   BadRequestException,
   HttpException,
@@ -15,30 +11,32 @@ import { EmailService } from '../../../../common/email/email.service';
 import { BcryptAdapter } from '../../../../common/adapters/bcrypt.adapter';
 import { RefreshTokenRepository } from '../infrastructure/refresh.token.repository';
 import { UserCreateInputModel } from '../../../users/api/admin/models/user.create.input.model';
-import { EmailConfirmationCodeService } from '../../../../common/token.services/email.confirmation.code.service';
-import { tokenServiceCommands } from '../../../../common/token.services/utils/common';
+import { EmailConfirmationCode } from '../../../../common/token.services/email-confirmation-code.service';
 import { LoginInputModel, UserEmailDto } from '../api/models/login.input.model';
-import { RefreshTokenService } from '../../../../common/token.services/refresh.token.service';
+import { RefreshToken } from '../../../../common/token.services/refresh-token.service';
 import { SessionInputModel } from '../../devices/api/models/session.input.models';
 import { UserDocument } from '../../../users/infrastructure/users.schema';
 import { DevicesService } from '../../devices/application/devices.service';
-
-class SessionsService {}
+import { AccessToken } from '../../../../common/token.services/access-token.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UsersService,
-    private readonly emailService: EmailService,
-    private readonly cryptAdapter: BcryptAdapter,
+    protected readonly userService: UsersService,
+    protected readonly emailService: EmailService,
+    protected readonly cryptAdapter: BcryptAdapter,
+    protected readonly accessToken: AccessToken,
+    protected readonly refreshToken: RefreshToken,
+    protected readonly confirmationCode: EmailConfirmationCode,
     protected refreshTokenRepository: RefreshTokenRepository,
-    protected sessionService: DevicesService,
+    protected devicesService: DevicesService,
   ) {}
 
   async registerUser(registrationDto: UserCreateInputModel) {
     let user = await this.userService.getUserByLoginOrEmail(
       registrationDto.login,
     );
+
     // TODO fix it - change to native Error
     if (user)
       throw new BadRequestException({
@@ -65,19 +63,20 @@ export class AuthService {
     const createdUser = await this.userService.getUserById(createdUserId);
     if (!createdUser) return false;
 
-    const emailConfirmationCode = new EmailConfirmationCodeService(
-      tokenServiceCommands.create,
-      { email: createdUser.email },
-    );
+    const emailConfirmationCode = this.confirmationCode.create({
+      email: createdUser.email,
+    });
 
     const isEmailSent = await this.emailService.sendEmailConfirmationEmail(
       createdUser,
-      emailConfirmationCode.get(),
+      emailConfirmationCode,
     );
+
     if (!isEmailSent) {
       await this.userService.delete(createdUser.id);
       return false;
     }
+
     return true;
   }
 
@@ -94,25 +93,23 @@ export class AuthService {
         ],
       });
 
-    const emailConfirmationCode = new EmailConfirmationCodeService(
-      tokenServiceCommands.create,
-      { email: email.email },
-    );
+    const emailConfirmationCode = this.confirmationCode.create({
+      email: user.email,
+    });
 
-    return await this.emailService.reSendEmailConfirmationEmail(
+    return await this.emailService.sendEmailConfirmationEmail(
       user,
-      emailConfirmationCode.get(),
+      emailConfirmationCode,
     );
   }
 
   async confirmEmail(confirmationCode: UserConfirmationCodeDto) {
-    const emailConfirmationCode = new EmailConfirmationCodeService(
-      'set',
+    const refreshTokenPayload = this.confirmationCode.decode(
       confirmationCode.code,
     );
 
     // TODO fix it - change to native Error
-    if (!emailConfirmationCode.verify())
+    if (!refreshTokenPayload)
       throw new BadRequestException({
         errorsMessages: [
           {
@@ -123,7 +120,7 @@ export class AuthService {
       });
 
     const user = await this.userService.getUserByLoginOrEmail(
-      emailConfirmationCode.decode().email,
+      refreshTokenPayload.email,
     );
 
     // TODO fix it - change to native Error
@@ -141,19 +138,19 @@ export class AuthService {
   }
 
   async refreshTokens(oldRefreshToken: string) {
-    const _oldRefreshToken = new RefreshTokenService('set', oldRefreshToken);
     const isInBlackList =
       await this.refreshTokenRepository.findInBlackList(oldRefreshToken);
 
-    if (!_oldRefreshToken.verify() || isInBlackList)
+    const refreshTokenPayload = this.refreshToken.decode(oldRefreshToken);
+    if (!refreshTokenPayload || isInBlackList)
       throw new UnauthorizedException();
 
     await this.refreshTokenRepository.addToBlackList(oldRefreshToken);
 
-    const deviceId = _oldRefreshToken.decode().deviceId;
-    const userId = _oldRefreshToken.decode().userId;
+    const deviceId = refreshTokenPayload.deviceId;
+    const userId = refreshTokenPayload.userId;
 
-    return await this.sessionService.updateSession(userId, deviceId);
+    return await this.devicesService.updateSession(userId, deviceId);
   }
 
   // async passwordRecoveryCode(email: string) {
@@ -200,23 +197,24 @@ export class AuthService {
     if (!isSuccess)
       throw new HttpException('Bad login or password', HttpStatus.UNAUTHORIZED);
 
-    return await this.sessionService.createSession(sessionInputModel, user);
+    return await this.devicesService.createSession(sessionInputModel, user);
   }
 
   async logout(oldRefreshToken: string) {
-    const refreshToken = new RefreshTokenService('set', oldRefreshToken);
     const isInBlackList =
       await this.refreshTokenRepository.findInBlackList(oldRefreshToken);
 
-    if (!refreshToken.verify() || isInBlackList) {
+    const refreshTokenPayload = this.refreshToken.decode(oldRefreshToken);
+    if (!refreshTokenPayload || isInBlackList) {
+      console.log('in black list');
       throw new UnauthorizedException();
     }
 
-    const currentDeviceId = refreshToken.decode().deviceId;
+    const currentDeviceId = refreshTokenPayload.deviceId;
     await this.refreshTokenRepository.addToBlackList(oldRefreshToken);
-    await this.sessionService.terminateSession(
+    await this.devicesService.terminateSession(
       currentDeviceId,
-      refreshToken.get(),
+      oldRefreshToken,
     );
   }
 }

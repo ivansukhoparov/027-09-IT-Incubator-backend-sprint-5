@@ -5,7 +5,7 @@ import { RefreshTokenDecodedDto } from './types/refresh.token';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class RefreshTokenService extends BaseToken<RefreshTokenDecodedDto> {
+export class RefreshToken extends BaseToken<RefreshTokenDecodedDto> {
   constructor() {
     super(
       appSettings.api.JWT_SECRET_KEY,

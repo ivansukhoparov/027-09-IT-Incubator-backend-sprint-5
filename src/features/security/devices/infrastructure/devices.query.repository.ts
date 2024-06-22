@@ -3,22 +3,24 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Session } from './devices.schema';
 import { securityMapper } from '../types/mapper';
-import { RefreshTokenService } from '../../../../common/token.services/refresh.token.service';
+import { RefreshToken } from '../../../../common/token.services/refresh-token.service';
 import { SecurityDevicesOutput } from '../types/output';
 
 @Injectable()
 export class DevicesQueryRepository {
   constructor(
     @InjectModel(Session.name) private sessionModel: Model<Session>,
+    protected readonly refreshToken: RefreshToken,
   ) {}
 
   async getSessionsByUserId(
     refreshTokenValue: string,
   ): Promise<SecurityDevicesOutput[]> {
-    const refreshToken = new RefreshTokenService('set', refreshTokenValue);
-    if (!refreshToken.verify()) throw new UnauthorizedException();
+    const refreshTokenPayload = this.refreshToken.decode(refreshTokenValue);
 
-    const userId = refreshToken.decode().userId;
+    if (!refreshTokenPayload) throw new UnauthorizedException();
+
+    const userId = refreshTokenPayload.userId;
 
     const sessions = await this.sessionModel.find({ userId: userId }).lean();
     return sessions.map(securityMapper);

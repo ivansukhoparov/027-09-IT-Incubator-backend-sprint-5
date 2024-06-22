@@ -22,17 +22,17 @@ import { CommentsLikesInputModel } from '../../likes/api/models/likes.input.mode
 import { UpdateCommentInputModel } from './models/comments.input.models';
 import { CommentDocument } from '../infrastructure/comments.schema';
 import { UsersService } from '../../../users/application/users.service';
-import { AccessTokenService } from '../../../../common/token.services/access.token.service';
-import { tokenServiceCommands } from '../../../../common/token.services/utils/common';
+import { AccessToken } from '../../../../common/token.services/access-token.service';
 import { AuthGuard } from '../../../../infrastructure/guards/admin-auth-guard.service';
 
 @Controller('comments')
 export class CommentsController {
   constructor(
-    protected commentsQueryRepository: CommentsQueryRepository,
-    protected commentsLikesService: CommentsLikesService,
-    protected usersService: UsersService,
-    protected commentsService: CommentsService,
+    protected readonly commentsQueryRepository: CommentsQueryRepository,
+    protected readonly commentsLikesService: CommentsLikesService,
+    protected readonly usersService: UsersService,
+    protected readonly commentsService: CommentsService,
+    protected readonly accessToken: AccessToken,
   ) {}
 
   @Get(':id')
@@ -40,11 +40,8 @@ export class CommentsController {
   async getById(@Param('id') id: string, @Req() req: any) {
     try {
       const authHeader = req.header('authorization')?.split(' ');
-      const token = new AccessTokenService(
-        tokenServiceCommands.set,
-        authHeader[1],
-      );
-      const userId = token.decode().userId;
+      const accessTokenPayload = this.accessToken.decode(authHeader[1]);
+      const userId = accessTokenPayload.userId;
       return await this.commentsQueryRepository.getById(id, userId);
     } catch {
       return await this.commentsQueryRepository.getById(id);
@@ -60,11 +57,8 @@ export class CommentsController {
     @Req() req: Request,
   ) {
     const authHeader = req.header('authorization')?.split(' ');
-    const token = new AccessTokenService(
-      tokenServiceCommands.set,
-      authHeader[1],
-    );
-    const userId = token.decode().userId;
+    const accessTokenPayload = this.accessToken.decode(authHeader[1]);
+    const userId = accessTokenPayload.userId;
     const comment: CommentDocument =
       await this.commentsService.getCommentById(id);
     if (userId != comment.commentatorInfo.userId) {
@@ -79,11 +73,8 @@ export class CommentsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteComment(@Param('id') id: string, @Req() req: Request) {
     const authHeader = req.header('authorization')?.split(' ');
-    const token = new AccessTokenService(
-      tokenServiceCommands.set,
-      authHeader[1],
-    );
-    const userId = token.decode().userId;
+    const accessTokenPayload = this.accessToken.decode(authHeader[1]);
+    const userId = accessTokenPayload.userId;
     const comment: CommentDocument =
       await this.commentsService.getCommentById(id);
 
@@ -105,11 +96,8 @@ export class CommentsController {
     const isCommentExist = await this.commentsService.isCommentExist(commentId);
     if (!isCommentExist) throw new NotFoundException();
     const authHeader = req.header('authorization')?.split(' ');
-    const token = new AccessTokenService(
-      tokenServiceCommands.set,
-      authHeader[1],
-    );
-    const userId = token.decode().userId;
+    const accessTokenPayload = this.accessToken.decode(authHeader[1]);
+    const userId = accessTokenPayload.userId;
     await this.commentsLikesService.updateLike(userId, commentId, inputModel);
 
     return;

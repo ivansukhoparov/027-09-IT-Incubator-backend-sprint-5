@@ -17,10 +17,7 @@ import {
 import { PostsService } from '../application/posts.service';
 import { PostsQueryRepository } from '../infrastructure/posts.query.repository';
 import { CommentsQueryRepository } from '../../comments/infrastructure/comments.query.repository';
-import {
-  CreatePostInputModel,
-  UpdatePostInputModel,
-} from './models/posts.input.models';
+import { CreatePostInputModel } from './models/posts.input.models';
 import { CommentCreateInputModel } from '../../comments/api/models/comments.input.models';
 import { CommentCreateDto } from '../../comments/types/input';
 import { Request } from 'express';
@@ -31,8 +28,7 @@ import { BlogsService } from '../../blogs/application/blogs.service';
 import { UsersService } from '../../../users/application/users.service';
 import { QueryUsersRequestType } from '../../../users/types/input';
 import { createQuery } from '../../../common/create.query';
-import { AccessTokenService } from '../../../../common/token.services/access.token.service';
-import { tokenServiceCommands } from '../../../../common/token.services/utils/common';
+import { AccessToken } from '../../../../common/token.services/access-token.service';
 import {
   AdminAuthGuard,
   AuthGuard,
@@ -41,13 +37,14 @@ import {
 @Controller('posts')
 export class PostsController {
   constructor(
-    protected postsService: PostsService,
-    protected blogsService: BlogsService,
-    protected postsQueryRepository: PostsQueryRepository,
-    protected commentsService: CommentsService,
-    protected commentsQueryRepository: CommentsQueryRepository,
-    protected userService: UsersService,
-    protected postsLikesService: PostsLikesService,
+    protected readonly postsService: PostsService,
+    protected readonly blogsService: BlogsService,
+    protected readonly postsQueryRepository: PostsQueryRepository,
+    protected readonly commentsService: CommentsService,
+    protected readonly commentsQueryRepository: CommentsQueryRepository,
+    protected readonly userService: UsersService,
+    protected readonly postsLikesService: PostsLikesService,
+    protected readonly accessToken: AccessToken,
   ) {}
 
   @Get()
@@ -58,11 +55,8 @@ export class PostsController {
     const { sortData, searchData } = createQuery(query);
     try {
       const authHeader = req.header('authorization')?.split(' ');
-      const token = new AccessTokenService(
-        tokenServiceCommands.set,
-        authHeader[1],
-      );
-      const userId = token.decode().userId;
+      const accessTokenPayload = this.accessToken.decode(authHeader[1]);
+      const userId = accessTokenPayload.userId;
       return await this.postsQueryRepository.getAllPosts(
         sortData,
         null,
@@ -77,11 +71,8 @@ export class PostsController {
   async getPostById(@Param('id') id: string, @Req() req: Request) {
     try {
       const authHeader = req.header('authorization')?.split(' ');
-      const token = new AccessTokenService(
-        tokenServiceCommands.set,
-        authHeader[1],
-      );
-      const userId = token.decode().userId;
+      const accessTokenPayload = this.accessToken.decode(authHeader[1]);
+      const userId = accessTokenPayload.userId;
       return await this.postsQueryRepository.getPostById(id, userId);
     } catch {
       return await this.postsQueryRepository.getPostById(id);
@@ -97,11 +88,8 @@ export class PostsController {
     const { sortData, searchData } = createQuery(query);
     try {
       const authHeader = req.header('authorization')?.split(' ');
-      const token = new AccessTokenService(
-        tokenServiceCommands.set,
-        authHeader[1],
-      );
-      const userId = token.decode().userId;
+      const accessTokenPayload = this.accessToken.decode(authHeader[1]);
+      const userId = accessTokenPayload.userId;
       return await this.commentsQueryRepository.getAllCommentsByPostId(
         sortData,
         id,
@@ -132,11 +120,8 @@ export class PostsController {
     @Body() inputModel: CommentCreateInputModel,
   ) {
     const authHeader = req.header('authorization')?.split(' ');
-    const token = new AccessTokenService(
-      tokenServiceCommands.set,
-      authHeader[1],
-    );
-    const userId = token.decode().userId;
+    const accessTokenPayload = this.accessToken.decode(authHeader[1]);
+    const userId = accessTokenPayload.userId;
     const user = await this.userService.getUserById(userId);
 
     const commentCreateDto: CommentCreateDto = {
@@ -162,12 +147,8 @@ export class PostsController {
     if (!isPostExist) throw new NotFoundException();
 
     const authHeader = req.header('authorization')?.split(' ');
-    const token = new AccessTokenService(
-      tokenServiceCommands.set,
-      authHeader[1],
-    );
-
-    const userId = token.decode().userId;
+    const accessTokenPayload = this.accessToken.decode(authHeader[1]);
+    const userId = accessTokenPayload.userId;
     await this.postsLikesService.updateLike(userId, postID, inputModel);
 
     return;

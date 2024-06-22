@@ -29,18 +29,18 @@ import {
 } from '../../../posts/api/models/posts.input.models';
 import { QueryUsersRequestType } from '../../../../users/types/input';
 import { createQuery } from '../../../../common/create.query';
-import { AccessTokenService } from '../../../../../common/token.services/access.token.service';
-import { tokenServiceCommands } from '../../../../../common/token.services/utils/common';
+import { AccessToken } from '../../../../../common/token.services/access-token.service';
 import { AdminAuthGuard } from '../../../../../infrastructure/guards/admin-auth-guard.service';
 
 @Controller('sa/blogs')
 @UseGuards(AdminAuthGuard)
 export class AdminBlogsController {
   constructor(
-    protected blogsService: BlogsService,
-    protected postsService: PostsService,
-    protected blogsQueryRepository: BlogsQueryRepository,
-    protected postsQueryRepository: PostsQueryRepository,
+    protected readonly blogsService: BlogsService,
+    protected readonly postsService: PostsService,
+    protected readonly blogsQueryRepository: BlogsQueryRepository,
+    protected readonly postsQueryRepository: PostsQueryRepository,
+    protected readonly accessToken: AccessToken,
   ) {}
 
   @Get()
@@ -81,11 +81,8 @@ export class AdminBlogsController {
 
     try {
       const authHeader = req.header('authorization')?.split(' ');
-      const token = new AccessTokenService(
-        tokenServiceCommands.set,
-        authHeader[1],
-      );
-      const userId = token.decode().userId;
+      const accessTokenPayload = this.accessToken.decode(authHeader[1]);
+      const userId = accessTokenPayload.userId;
       return await this.postsQueryRepository.getAllPosts(
         sortData,
         blogId,

@@ -85,7 +85,6 @@ export abstract class BaseToken<Decoded> {
       const decodedToken: JwtPayload = jwt.decode(token, { json: true });
       return this.tokenMapper(decodedToken);
     } catch (err) {
-      console.log(err);
       return null;
     }
   }

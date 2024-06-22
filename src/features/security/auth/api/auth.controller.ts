@@ -17,17 +17,19 @@ import { Response, Request } from 'express';
 import { SkipThrottle, ThrottlerGuard } from '@nestjs/throttler';
 import { UsersQueryRepository } from '../../../users/infrastructure/users.query.repository';
 import { AuthGuard } from '../../../../infrastructure/guards/admin-auth-guard.service';
-import { AccessTokenService } from '../../../../common/token.services/access.token.service';
-import { tokenServiceCommands } from '../../../../common/token.services/utils/common';
+import { AccessToken } from '../../../../common/token.services/access-token.service';
 import { UserCreateInputModel } from '../../../users/api/admin/models/user.create.input.model';
 import { SessionInputModel } from '../../devices/api/models/session.input.models';
+import { RefreshToken } from '../../../../common/token.services/refresh-token.service';
 
 @Controller('auth')
 @UseGuards(ThrottlerGuard)
 export class AuthController {
   constructor(
-    protected authService: AuthService,
-    protected usersQueryRepository: UsersQueryRepository,
+    protected readonly authService: AuthService,
+    protected readonly usersQueryRepository: UsersQueryRepository,
+    protected readonly accessToken: AccessToken,
+    protected readonly refreshToken: RefreshToken,
   ) {}
 
   @SkipThrottle()
@@ -37,11 +39,9 @@ export class AuthController {
   async getMe(@Req() req: Request) {
     try {
       const authHeader = req.header('authorization')?.split(' ');
-      const token = new AccessTokenService(
-        tokenServiceCommands.set,
-        authHeader[1],
-      );
-      const userId = token.decode().userId;
+      const accessTokenPayload = this.accessToken.decode(authHeader[1]);
+      const userId = accessTokenPayload.userId;
+
       return this.usersQueryRepository.getUserAuthMe(userId);
     } catch {
       throw new UnauthorizedException();
@@ -86,15 +86,17 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     try {
-      const oldRefreshToken = req.headers['cookie'].split('=')[1];
-      // const oldRefreshToken = req.cookies.refreshToken;
+      //const oldRefreshToken = req.headers['cookie'].split('=')[1];
+      const oldRefreshToken = req.cookies.refreshToken;
       const { accessToken, refreshToken } =
         await this.authService.refreshTokens(oldRefreshToken);
-      res.cookie('refreshToken', refreshToken.get(), {
+
+      res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: true,
       });
-      return accessToken.getModel();
+
+      return { accessToken: accessToken };
     } catch {
       throw new UnauthorizedException();
     }
@@ -116,12 +118,12 @@ export class AuthController {
       loginDto,
       sessionInputModel,
     );
-    res.cookie('refreshToken', refreshToken.get(), {
+    res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
     });
     // console.log(refreshToken);
-    return accessToken.getModel();
+    return { accessToken: accessToken };
   }
 
   @SkipThrottle()
@@ -129,8 +131,8 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(@Req() req: Request) {
     try {
-      const refreshToken = req.headers['cookie'].split('=')[1];
-      // const refreshToken = req.cookies.refreshToken;
+      // const refreshToken = req.headers['cookie'].split('=')[1];
+      const refreshToken = req.cookies.refreshToken;
       await this.authService.logout(refreshToken);
       return;
     } catch (err) {
