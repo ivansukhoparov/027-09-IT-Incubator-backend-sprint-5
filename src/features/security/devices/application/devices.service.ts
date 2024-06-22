@@ -6,6 +6,7 @@ import { RefreshToken } from '../../../../common/token.services/refresh-token.se
 import { UserDocument } from '../../../users/infrastructure/users.schema';
 import { InterlayerNotice } from '../../../../base/models/interlayer.notice';
 import { SessionInputModel, SessionModel, SessionUpdateModel } from '../api/models/session.input.models';
+import { TokenPair } from '../../auth/types/output';
 
 @Injectable()
 export class DevicesService {
@@ -42,7 +43,7 @@ export class DevicesService {
     return { accessToken, refreshToken };
   }
 
-  async updateSession(UserId: string, deviceId: string) {
+  async updateSession(UserId: string, deviceId: string): Promise<TokenPair> {
     const accessToken = this.accessToken.create({
       userId: UserId,
     });
