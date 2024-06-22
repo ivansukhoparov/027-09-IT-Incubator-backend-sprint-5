@@ -23,20 +23,21 @@ export class NodemailerAdapter implements IEmailAdapter {
           rejectUnauthorized: false,
         },
       });
-
       const s = await transporter.sendMail({
         ...emailMessage,
         from: this.sendFrom,
         to: mailTo,
       });
-      console.log(s);
-      interlayerNotice.addData(true);
-      return interlayerNotice;
+      if (s.rejected.length > 0) {
+        interlayerNotice.addError('Something wrong', 'server', ERRORS_CODES.EMAIL_SEND_ERROR);
+        return interlayerNotice;
+      } else {
+        interlayerNotice.addData(true);
+        return interlayerNotice;
+      }
     } catch (err) {
       interlayerNotice.addError('Something wrong', 'server', ERRORS_CODES.EMAIL_SEND_ERROR);
       return interlayerNotice;
-      // console.log(err);
-      // return false;
     }
   }
 }

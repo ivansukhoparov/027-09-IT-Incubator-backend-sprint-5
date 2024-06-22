@@ -67,10 +67,10 @@ export class UsersQueryRepository implements IUsersQueryRepository {
         //                  `,
         // [searchString, orderString, pageSize, skipped],
       );
-      console.log(result);
+      // console.log(result);
       return result;
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       throw new NotFoundException();
     }
   }

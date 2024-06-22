@@ -1,3 +1,5 @@
+import { BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
+
 export class InterlayerNotice<D = null> {
   public data: D | null = null;
   public extension: { key: string; msg: string } | null = null;
@@ -8,17 +10,18 @@ export class InterlayerNotice<D = null> {
     this.code = code;
   }
 
-  addData(data: D) {
+  public addData(data: D) {
     this.data = data;
   }
 
-  addError(message: string, key: string, code: number) {
+  public addError(message: string, key: string, code: number) {
+    this.extension = { key: '', msg: '' };
     this.extension.key = key;
     this.extension.msg = message;
     this.code = code;
   }
 
-  hasError() {
+  public hasError() {
     return this.code !== 0;
   }
 }
@@ -30,4 +33,25 @@ export const ERRORS_CODES = {
   ALREADY_CONFIRMED: 1002,
   INVALID_TOKEN: 1003,
   DATA_BASE_ERROR: 1004,
+};
+
+export const interlayerNoticeHandler = (interlayerNotice: InterlayerNotice<any>) => {
+  if (interlayerNotice.hasError()) {
+    if (interlayerNotice.code === ERRORS_CODES.UNAUTHORIZED) {
+      throw new HttpException('Bad login or password', interlayerNotice.code);
+    } else if (interlayerNotice.code === ERRORS_CODES.BAD_REQUEST) {
+      throw new BadRequestException({
+        errorsMessages: [
+          {
+            message: interlayerNotice.extension.msg,
+            field: interlayerNotice.extension.key,
+          },
+        ],
+      });
+    } else if (interlayerNotice.code >= 1000) {
+      throw new HttpException('Bad login or password', HttpStatus.BAD_GATEWAY);
+    }
+  } else {
+    return;
+  }
 };

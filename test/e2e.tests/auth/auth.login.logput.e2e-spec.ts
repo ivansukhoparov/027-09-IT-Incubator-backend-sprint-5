@@ -30,8 +30,8 @@ describe('Auth tests', () => {
 
   beforeAll(async () => {
     // Use this to change tokens expiration tine
-    appSettings.api.ACCESS_TOKEN_EXPIRATION_TIME = '50s';
-    appSettings.api.REFRESH_TOKEN_EXPIRATION_TIME = '80s';
+    appSettings.api.ACCESS_TOKEN_EXPIRATION_TIME = '5s';
+    appSettings.api.REFRESH_TOKEN_EXPIRATION_TIME = '8s';
     // appSettings.api.EMAIL_CONFIRMATION_EXPIRATION_TIME = "10s"
     // appSettings.api.RECOVERY_TOKEN_EXPIRATION_TIME = "10s"
 
@@ -159,7 +159,7 @@ describe('Auth tests', () => {
   });
 
   it(`+ POST request to "refresh-token" endpoint with correct refresh token should return code 401 if token has been expired `, async () => {
-    await new Promise((resolve) => setTimeout(resolve, 8000));
+    await new Promise((resolve) => setTimeout(resolve, 9000));
 
     await authTestManager.getNewRefreshToken(user1.refreshToken).then((res) => {
       expect(res.statusCode).toBe(HttpStatus.UNAUTHORIZED);

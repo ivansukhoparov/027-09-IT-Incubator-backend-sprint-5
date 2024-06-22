@@ -1,4 +1,16 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Res, Get, Req, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  UseGuards,
+  Res,
+  Get,
+  Req,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { UserConfirmationCodeDto } from '../types/input';
 import { AuthService } from '../application/auth.service';
 import { LoginInputModel, UserEmailDto } from './models/login.input.model';
@@ -10,6 +22,8 @@ import { AccessToken } from '../../../../common/token.services/access-token.serv
 import { UserCreateInputModel } from '../../../users/api/admin/models/user.create.input.model';
 import { SessionInputModel } from '../../devices/api/models/session.input.models';
 import { RefreshToken } from '../../../../common/token.services/refresh-token.service';
+import { interlayerNoticeHandler } from '../../../../base/models/interlayer.notice';
+import { TokenPair } from '../types/output';
 
 @Controller('auth')
 @UseGuards(ThrottlerGuard)
@@ -41,32 +55,24 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async registration(@Body() registrationDto: UserCreateInputModel) {
     const interlayerNotice = await this.authService.registerUser(registrationDto);
-    if (interlayerNotice.hasError()) {
-      throw new BadRequestException({
-        errorsMessages: [
-          {
-            message: interlayerNotice.extension.msg,
-            field: interlayerNotice.extension.key,
-          },
-        ],
-      });
-    } else {
-      return;
-    }
+    interlayerNoticeHandler(interlayerNotice);
+    return;
   }
 
   @Post('registration-confirmation')
   @HttpCode(HttpStatus.NO_CONTENT)
   async registrationConfirmation(@Body() confirmationCode: UserConfirmationCodeDto) {
-    const isSuccess = await this.authService.confirmEmail(confirmationCode);
-    if (isSuccess) return;
+    const interlayerNotice = await this.authService.confirmEmail(confirmationCode);
+    interlayerNoticeHandler(interlayerNotice);
+    return;
   }
 
   @Post('registration-email-resending')
   @HttpCode(HttpStatus.NO_CONTENT)
   async registrationEmailResending(@Body() resendingRequestDto: UserEmailDto) {
-    const isSuccess = await this.authService.resendConfirmationCode(resendingRequestDto);
-    if (isSuccess) return;
+    const interlayerNotice = await this.authService.resendConfirmationCode(resendingRequestDto);
+    interlayerNoticeHandler(interlayerNotice);
+    return;
   }
 
   @Post('password-recovery')
@@ -80,16 +86,18 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async getNewRefreshToken(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     try {
-      //const oldRefreshToken = req.headers['cookie'].split('=')[1];
-      const oldRefreshToken = req.cookies.refreshToken;
-      const { accessToken, refreshToken } = await this.authService.refreshTokens(oldRefreshToken);
+      const oldRefreshToken = req.headers['cookie'].split('=')[1];
+      //const oldRefreshToken = req.cookies.refreshToken;
+      const interlayerNotice = await this.authService.refreshTokens(oldRefreshToken);
+      interlayerNoticeHandler(interlayerNotice);
+      const tokens: TokenPair = interlayerNotice.data;
 
-      res.cookie('refreshToken', refreshToken, {
+      res.cookie('refreshToken', tokens.refreshToken, {
         httpOnly: true,
         secure: true,
       });
 
-      return { accessToken: accessToken };
+      return { accessToken: tokens.accessToken };
     } catch {
       throw new UnauthorizedException();
     }
@@ -102,28 +110,26 @@ export class AuthController {
       deviceTitle: req.header('user-agent')?.split(' ')[1] || 'unknown',
       ip: req.ip || 'unknown',
     };
+    const interlayerNotice = await this.authService.loginUser(loginDto, sessionInputModel);
+    interlayerNoticeHandler(interlayerNotice);
+    const tokens: TokenPair = interlayerNotice.data;
 
-    const { accessToken, refreshToken } = await this.authService.loginUser(loginDto, sessionInputModel);
-    res.cookie('refreshToken', refreshToken, {
+    res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       secure: true,
     });
     // console.log(refreshToken);
-    return { accessToken: accessToken };
+    return { accessToken: tokens.accessToken };
   }
 
   @SkipThrottle()
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(@Req() req: Request) {
-    try {
-      // const refreshToken = req.headers['cookie'].split('=')[1];
-      const refreshToken = req.cookies.refreshToken;
-      await this.authService.logout(refreshToken);
-      return;
-    } catch (err) {
-      console.log('error from controllrs', err);
-      throw new UnauthorizedException();
-    }
+    const refreshToken = req.headers['cookie'].split('=')[1];
+    //const refreshToken = req.cookies.refreshToken;
+    const interlayerNotice = await this.authService.logout(refreshToken);
+    interlayerNoticeHandler(interlayerNotice);
+    return;
   }
 }

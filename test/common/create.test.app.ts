@@ -8,9 +8,9 @@ import { EmailService } from '../../src/common/email/email.service';
 export const creteTestApp = async () => {
   const testingAppModuleBuilder: TestingModuleBuilder = Test.createTestingModule({
     imports: [AppModule],
-  })
-    .overrideProvider(EmailService)
-    .useClass(MockEmailService);
+  });
+  // .overrideProvider(EmailService)
+  // .useClass(MockEmailService);
 
   const testingAppModule = await testingAppModuleBuilder.compile();
 

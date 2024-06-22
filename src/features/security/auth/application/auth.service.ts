@@ -56,6 +56,11 @@ export class AuthService {
     });
 
     return await this.emailService.sendEmailConfirmationEmail(createdUser, emailConfirmationCode);
+    // console.log(isSent);
+    // if (isSent) {
+    //   interlayerNotice.addData(true);
+    //   return interlayerNotice;
+    // }
   }
 
   async resendConfirmationCode(email: UserEmailDto): Promise<InterlayerNotice<boolean>> {
@@ -115,7 +120,6 @@ export class AuthService {
     const interlayerNotice: InterlayerNotice<TokenPair> = new InterlayerNotice<TokenPair>();
     const isInBlackList = await this.refreshTokenRepository.findInBlackList(oldRefreshToken);
     const refreshTokenPayload = this.refreshToken.decode(oldRefreshToken);
-
     if (!refreshTokenPayload || isInBlackList) {
       interlayerNotice.addError('Refresh token not valid', 'refreshToken', ERRORS_CODES.INVALID_TOKEN);
       return interlayerNotice;

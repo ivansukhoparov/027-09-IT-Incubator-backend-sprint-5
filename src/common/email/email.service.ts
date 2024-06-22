@@ -13,11 +13,17 @@ export class EmailService {
   ) {}
 
   async sendEmailConfirmationEmail(user: UserType, confirmationCode: string): Promise<InterlayerNotice<boolean>> {
-    return await this.emailAdapter.sendEmail(user.email, this.messageManager.confirmationEmail(confirmationCode, user.login));
+    return await this.emailAdapter.sendEmail(
+      user.email,
+      this.messageManager.confirmationEmail(confirmationCode, user.login),
+    );
   }
 
   async reSendEmailConfirmationEmail(user: UserType, confirmationCode: string): Promise<InterlayerNotice<boolean>> {
-    return await this.emailAdapter.sendEmail(user.email, this.messageManager.reConfirmationEmail(confirmationCode, user.email));
+    return await this.emailAdapter.sendEmail(
+      user.email,
+      this.messageManager.reConfirmationEmail(confirmationCode, user.email),
+    );
   }
 
   async sendPasswordRecoveryCode(user: UserType, recoveryCode: string): Promise<InterlayerNotice<boolean>> {
