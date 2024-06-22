@@ -30,9 +30,7 @@ describe.skip('sa/users POST test', () => {
   afterAll(async () => {});
 
   beforeEach(async () => {
-    const deleteAll = await request(app.getHttpServer()).delete(
-      '/testing/all-data',
-    );
+    const deleteAll = await request(app.getHttpServer()).delete('/testing/all-data');
     expect(deleteAll.statusCode).toBe(HttpStatus.NO_CONTENT);
   });
 
@@ -62,9 +60,7 @@ describe.skip('sa/users POST test', () => {
     // @ts-ignore
     await usersTestManager.createOne(userCreateModelNoData).then((res) => {
       expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
-      expect(res.body).toEqual(
-        errorsResponse.getBody(['login', 'password', 'email']),
-      );
+      expect(res.body).toEqual(errorsResponse.getBody(['login', 'password', 'email']));
     });
   });
 
@@ -80,12 +76,10 @@ describe.skip('sa/users POST test', () => {
     // With too short password field
     const createUserDtoInvalidPassword = new TestsCreateUserModel(1);
     createUserDtoInvalidPassword.password = createLengthString(5);
-    await usersTestManager
-      .createOne(createUserDtoInvalidPassword)
-      .then((res) => {
-        expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
-        expect(res.body).toEqual(errorsResponse.getBody(['password']));
-      });
+    await usersTestManager.createOne(createUserDtoInvalidPassword).then((res) => {
+      expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errorsResponse.getBody(['password']));
+    });
   });
 
   it('- POST request should not create user if ONE OR MORE OF FIELDS TOO LONG and return status code 400 with errors array', async () => {
@@ -101,12 +95,10 @@ describe.skip('sa/users POST test', () => {
     // With too short password field
     const createUserDtoInvalidPassword = new TestsCreateUserModel(1);
     createUserDtoInvalidPassword.password = createLengthString(21);
-    await usersTestManager
-      .createOne(createUserDtoInvalidPassword)
-      .then((res) => {
-        expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
-        expect(res.body).toEqual(errorsResponse.getBody(['password']));
-      });
+    await usersTestManager.createOne(createUserDtoInvalidPassword).then((res) => {
+      expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errorsResponse.getBody(['password']));
+    });
   });
 
   it('- POST request should not create user if ONE OF FIELD IS EMPTY and return status code 400 with errors array', async () => {
@@ -121,12 +113,10 @@ describe.skip('sa/users POST test', () => {
     // With empty password field
     const createUserDtoInvalidPassword = new TestsCreateUserModel(1);
     createUserDtoInvalidPassword.password = '';
-    await usersTestManager
-      .createOne(createUserDtoInvalidPassword)
-      .then((res) => {
-        expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
-        expect(res.body).toEqual(errorsResponse.getBody(['password']));
-      });
+    await usersTestManager.createOne(createUserDtoInvalidPassword).then((res) => {
+      expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errorsResponse.getBody(['password']));
+    });
 
     // With empty email field
     const createUserDtoInvalidEmail = new TestsCreateUserModel(1);
@@ -138,18 +128,14 @@ describe.skip('sa/users POST test', () => {
   });
 
   it('- POST request should not create user if sent WRONG CREDENTIALS with correct create model status code 401', async () => {
-    await usersTestManagerNotAuth
-      .createOne(new TestsCreateUserModel(1))
-      .then((res) => {
-        expect(res.statusCode).toBe(HttpStatus.UNAUTHORIZED);
-      });
+    await usersTestManagerNotAuth.createOne(new TestsCreateUserModel(1)).then((res) => {
+      expect(res.statusCode).toBe(HttpStatus.UNAUTHORIZED);
+    });
   });
 
   it('+ POST request should create user and return new user with status code 201', async () => {
-    await usersTestManager
-      .createOne(new TestsCreateUserModel(1))
-      .then((res) => {
-        expect(res.statusCode).toBe(HttpStatus.CREATED);
-      });
+    await usersTestManager.createOne(new TestsCreateUserModel(1)).then((res) => {
+      expect(res.statusCode).toBe(HttpStatus.CREATED);
+    });
   });
 });

@@ -10,9 +10,7 @@ import { appSettings } from './settings/app.settings';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-const mongoModule = MongooseModule.forRoot(
-  appSettings.api.MONGO_CONNECTION_URI + '/' + appSettings.api.MONGO_DB_NAME,
-);
+const mongoModule = MongooseModule.forRoot(appSettings.api.MONGO_CONNECTION_URI + '/' + appSettings.api.MONGO_DB_NAME);
 
 const throttleModule = ThrottlerModule.forRoot([
   {

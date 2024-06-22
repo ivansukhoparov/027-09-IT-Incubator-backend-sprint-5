@@ -26,14 +26,7 @@ const queryCases = [GetAllUsersUseCase];
     ]),
   ],
   controllers: [AdminUsersController],
-  providers: [
-    BcryptAdapter,
-    UsersService,
-    UsersRepository,
-    UsersQueryRepository,
-    ...useCases,
-    ...queryCases,
-  ],
+  providers: [BcryptAdapter, UsersService, UsersRepository, UsersQueryRepository, ...useCases, ...queryCases],
   exports: [UsersService, UsersQueryRepository, BcryptAdapter],
 })
 export class UsersModule {}

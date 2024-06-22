@@ -8,14 +8,11 @@ import { BlogDocument } from '../../blogs/infrastructure/blogs.schema';
 
 @Injectable()
 export class CommentsRepository {
-  constructor(
-    @InjectModel(Comments.name) private commentModel: Model<Comments>,
-  ) {}
+  constructor(@InjectModel(Comments.name) private commentModel: Model<Comments>) {}
 
   async getCommentById(commentId: string) {
     try {
-      const comment: CommentDocument =
-        await this.commentModel.findById(commentId);
+      const comment: CommentDocument = await this.commentModel.findById(commentId);
       if (comment) {
         return comment;
       } else {
@@ -37,10 +34,7 @@ export class CommentsRepository {
 
   async updateComment(id: string, updateDto: UpdateCommentInputModel) {
     try {
-      const isUpdate = await this.commentModel.findOneAndUpdate(
-        { _id: new ObjectId(id) },
-        { $set: updateDto },
-      );
+      const isUpdate = await this.commentModel.findOneAndUpdate({ _id: new ObjectId(id) }, { $set: updateDto });
       return true;
     } catch {
       throw new NotFoundException();

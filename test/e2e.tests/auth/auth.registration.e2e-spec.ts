@@ -23,9 +23,7 @@ describe('Auth tests', () => {
     authTestManager = new AuthTestManager(app);
     usersTestManager = new UsersTestManager(app);
 
-    const deleteAll = await request(app.getHttpServer()).delete(
-      '/testing/all-data',
-    );
+    const deleteAll = await request(app.getHttpServer()).delete('/testing/all-data');
     expect(deleteAll.statusCode).toBe(HttpStatus.NO_CONTENT);
   });
 
@@ -69,9 +67,7 @@ describe('Auth tests', () => {
       .registration(authRegistrationNoData)
       .then((res) => {
         expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
-        expect(res.body).toEqual(
-          errorsResponse.getBody(['login', 'password', 'email']),
-        );
+        expect(res.body).toEqual(errorsResponse.getBody(['login', 'password', 'email']));
       });
   });
 
@@ -79,22 +75,18 @@ describe('Auth tests', () => {
     // With too short login field
     const createUserDtoInvalidLogin = new TestsRegistrationModel(1);
     createUserDtoInvalidLogin.login = createLengthString(2);
-    await authTestManager
-      .registration(createUserDtoInvalidLogin)
-      .then((res) => {
-        expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
-        expect(res.body).toEqual(errorsResponse.getBody(['login']));
-      });
+    await authTestManager.registration(createUserDtoInvalidLogin).then((res) => {
+      expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errorsResponse.getBody(['login']));
+    });
 
     // With too short password field
     const createUserDtoInvalidPassword = new TestsRegistrationModel(1);
     createUserDtoInvalidPassword.password = createLengthString(5);
-    await usersTestManager
-      .createOne(createUserDtoInvalidPassword)
-      .then((res) => {
-        expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
-        expect(res.body).toEqual(errorsResponse.getBody(['password']));
-      });
+    await usersTestManager.createOne(createUserDtoInvalidPassword).then((res) => {
+      expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errorsResponse.getBody(['password']));
+    });
   });
 
   it('- POST request to auth/register should not create user if ONE OR MORE OF FIELDS TOO LONG and return status code 400 with errors array', async () => {
@@ -102,54 +94,44 @@ describe('Auth tests', () => {
     const createUserDtoInvalidLogin = new TestsRegistrationModel(1);
     createUserDtoInvalidLogin.login = createLengthString(11);
 
-    await authTestManager
-      .registration(createUserDtoInvalidLogin)
-      .then((res) => {
-        expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
-        expect(res.body).toEqual(errorsResponse.getBody(['login']));
-      });
+    await authTestManager.registration(createUserDtoInvalidLogin).then((res) => {
+      expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errorsResponse.getBody(['login']));
+    });
 
     // With too short password field
     const createUserDtoInvalidPassword = new TestsRegistrationModel(1);
     createUserDtoInvalidPassword.password = createLengthString(21);
-    await usersTestManager
-      .createOne(createUserDtoInvalidPassword)
-      .then((res) => {
-        expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
-        expect(res.body).toEqual(errorsResponse.getBody(['password']));
-      });
+    await usersTestManager.createOne(createUserDtoInvalidPassword).then((res) => {
+      expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errorsResponse.getBody(['password']));
+    });
   });
 
   it('- POST request to auth/register should not create user if ONE OF FIELD IS EMPTY and return status code 400 with errors array', async () => {
     // With empty login field
     const createUserDtoInvalidLogin = new TestsRegistrationModel(1);
     createUserDtoInvalidLogin.login = '';
-    await authTestManager
-      .registration(createUserDtoInvalidLogin)
-      .then((res) => {
-        expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
-        expect(res.body).toEqual(errorsResponse.getBody(['login']));
-      });
+    await authTestManager.registration(createUserDtoInvalidLogin).then((res) => {
+      expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errorsResponse.getBody(['login']));
+    });
 
     // With empty password field
     const createUserDtoInvalidPassword = new TestsRegistrationModel(1);
     createUserDtoInvalidPassword.password = '';
-    await usersTestManager
-      .createOne(createUserDtoInvalidPassword)
-      .then((res) => {
-        expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
-        expect(res.body).toEqual(errorsResponse.getBody(['password']));
-      });
+    await usersTestManager.createOne(createUserDtoInvalidPassword).then((res) => {
+      expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errorsResponse.getBody(['password']));
+    });
 
     // With empty email field
     const createUserDtoInvalidEmail = new TestsRegistrationModel(1);
     createUserDtoInvalidEmail.password = '';
-    await authTestManager
-      .registration(createUserDtoInvalidEmail)
-      .then((res) => {
-        expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
-        expect(res.body).toEqual(errorsResponse.getBody(['password']));
-      });
+    await authTestManager.registration(createUserDtoInvalidEmail).then((res) => {
+      expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errorsResponse.getBody(['password']));
+    });
   });
 
   it(`+ POST request to auth/register with correct input model should create user and return status 204;

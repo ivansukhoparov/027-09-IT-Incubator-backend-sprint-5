@@ -42,10 +42,7 @@ export class CommentsService {
   }
   async updateComment(id: string, updateModel: UpdateCommentInputModel) {
     try {
-      const comment = await this.commentsRepository.updateComment(
-        id,
-        updateModel,
-      );
+      const comment = await this.commentsRepository.updateComment(id, updateModel);
     } catch {
       throw new NotFoundException();
     }

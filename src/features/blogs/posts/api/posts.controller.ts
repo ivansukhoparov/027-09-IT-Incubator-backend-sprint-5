@@ -29,10 +29,7 @@ import { UsersService } from '../../../users/application/users.service';
 import { QueryUsersRequestType } from '../../../users/types/input';
 import { createQuery } from '../../../common/create.query';
 import { AccessToken } from '../../../../common/token.services/access-token.service';
-import {
-  AdminAuthGuard,
-  AuthGuard,
-} from '../../../../infrastructure/guards/admin-auth-guard.service';
+import { AdminAuthGuard, AuthGuard } from '../../../../infrastructure/guards/admin-auth-guard.service';
 
 @Controller('posts')
 export class PostsController {
@@ -48,20 +45,13 @@ export class PostsController {
   ) {}
 
   @Get()
-  async getAllPosts(
-    @Query() query: QueryUsersRequestType,
-    @Req() req: Request,
-  ) {
+  async getAllPosts(@Query() query: QueryUsersRequestType, @Req() req: Request) {
     const { sortData, searchData } = createQuery(query);
     try {
       const authHeader = req.header('authorization')?.split(' ');
       const accessTokenPayload = this.accessToken.decode(authHeader[1]);
       const userId = accessTokenPayload.userId;
-      return await this.postsQueryRepository.getAllPosts(
-        sortData,
-        null,
-        userId,
-      );
+      return await this.postsQueryRepository.getAllPosts(sortData, null, userId);
     } catch {
       return await this.postsQueryRepository.getAllPosts(sortData);
     }
@@ -80,26 +70,15 @@ export class PostsController {
   }
 
   @Get(':id/comments')
-  async getAllPostComments(
-    @Query() query: QueryUsersRequestType,
-    @Param('id') id: string,
-    @Req() req: Request,
-  ) {
+  async getAllPostComments(@Query() query: QueryUsersRequestType, @Param('id') id: string, @Req() req: Request) {
     const { sortData, searchData } = createQuery(query);
     try {
       const authHeader = req.header('authorization')?.split(' ');
       const accessTokenPayload = this.accessToken.decode(authHeader[1]);
       const userId = accessTokenPayload.userId;
-      return await this.commentsQueryRepository.getAllCommentsByPostId(
-        sortData,
-        id,
-        userId,
-      );
+      return await this.commentsQueryRepository.getAllCommentsByPostId(sortData, id, userId);
     } catch {
-      return await this.commentsQueryRepository.getAllCommentsByPostId(
-        sortData,
-        id,
-      );
+      return await this.commentsQueryRepository.getAllCommentsByPostId(sortData, id);
     }
   }
 
@@ -114,11 +93,7 @@ export class PostsController {
 
   @Post(':postId/comments')
   @UseGuards(AuthGuard)
-  async createNewCommentToPost(
-    @Req() req: any,
-    @Param('postId') postId: string,
-    @Body() inputModel: CommentCreateInputModel,
-  ) {
+  async createNewCommentToPost(@Req() req: any, @Param('postId') postId: string, @Body() inputModel: CommentCreateInputModel) {
     const authHeader = req.header('authorization')?.split(' ');
     const accessTokenPayload = this.accessToken.decode(authHeader[1]);
     const userId = accessTokenPayload.userId;
@@ -130,19 +105,14 @@ export class PostsController {
       userId: user.id,
       userLogin: user.login,
     };
-    const commentId: string =
-      await this.commentsService.createComment(commentCreateDto);
+    const commentId: string = await this.commentsService.createComment(commentCreateDto);
     return await this.commentsQueryRepository.getById(commentId);
   }
 
   @Put(':postID/like-status')
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async updateLikeStatus(
-    @Param('postID') postID: string,
-    @Body() inputModel: PostsLikesInputModel,
-    @Req() req: any,
-  ) {
+  async updateLikeStatus(@Param('postID') postID: string, @Body() inputModel: PostsLikesInputModel, @Req() req: any) {
     const isPostExist = await this.postsService.isPostExist(postID);
     if (!isPostExist) throw new NotFoundException();
 

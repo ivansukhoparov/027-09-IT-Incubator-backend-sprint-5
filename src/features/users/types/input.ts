@@ -7,14 +7,7 @@
 //   pageSize?: number;
 // };
 
-import {
-  IsIn,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  isString,
-  Length,
-} from 'class-validator';
+import { IsIn, IsNotEmpty, IsOptional, IsString, isString, Length } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export type SortUsersRepositoryType = {

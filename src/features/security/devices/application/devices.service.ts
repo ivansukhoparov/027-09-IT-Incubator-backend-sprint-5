@@ -5,11 +5,7 @@ import { AccessToken } from '../../../../common/token.services/access-token.serv
 import { RefreshToken } from '../../../../common/token.services/refresh-token.service';
 import { UserDocument } from '../../../users/infrastructure/users.schema';
 import { InterlayerNotice } from '../../../../base/models/interlayer.notice';
-import {
-  SessionInputModel,
-  SessionModel,
-  SessionUpdateModel,
-} from '../api/models/session.input.models';
+import { SessionInputModel, SessionModel, SessionUpdateModel } from '../api/models/session.input.models';
 
 @Injectable()
 export class DevicesService {
@@ -19,10 +15,7 @@ export class DevicesService {
     protected readonly refreshToken: RefreshToken,
   ) {}
 
-  async createSession(
-    sessionInputModel: SessionInputModel,
-    user: UserDocument,
-  ) {
+  async createSession(sessionInputModel: SessionInputModel, user: UserDocument) {
     const deviceId = uuid4();
     const accessToken = this.accessToken.create({
       userId: user.id,
@@ -67,10 +60,7 @@ export class DevicesService {
       },
     };
 
-    await this.sessionsRepository.updateExistSession(
-      deviceId,
-      sessionUpdateModel,
-    );
+    await this.sessionsRepository.updateExistSession(deviceId, sessionUpdateModel);
     return { accessToken, refreshToken };
   }
 
@@ -80,12 +70,10 @@ export class DevicesService {
     if (!refreshTokenPayload) return new InterlayerNotice(null, 401);
 
     const currentUserId = refreshTokenPayload.userId;
-    const interlayerModel =
-      await this.sessionsRepository.getSessionByDeviceId(deviceId);
+    const interlayerModel = await this.sessionsRepository.getSessionByDeviceId(deviceId);
 
     if (!interlayerModel.hasError()) {
-      if (currentUserId !== interlayerModel.data.userId)
-        return new InterlayerNotice(null, 403);
+      if (currentUserId !== interlayerModel.data.userId) return new InterlayerNotice(null, 403);
     } else {
       return interlayerModel;
     }
@@ -101,10 +89,7 @@ export class DevicesService {
     const currentUserId = refreshTokenPayload.userId;
     const currentSessionDeviceId = refreshTokenPayload.deviceId;
 
-    await this.sessionsRepository.deleteSessionsExpectCurrent(
-      currentUserId,
-      currentSessionDeviceId,
-    );
+    await this.sessionsRepository.deleteSessionsExpectCurrent(currentUserId, currentSessionDeviceId);
     return;
   }
 }

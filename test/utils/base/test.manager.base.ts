@@ -12,10 +12,7 @@ export abstract class TestManagerBase<EntityOutputModel> {
   ) {}
 
   async createOne(createModel: any = this.createModel) {
-    return await request(this.app.getHttpServer())
-      .post(this.endPoint)
-      .auth(this.accessData.user, this.accessData.password)
-      .send(createModel);
+    return await request(this.app.getHttpServer()).post(this.endPoint).auth(this.accessData.user, this.accessData.password).send(createModel);
   }
 
   createMany = async (numberOfEntities: number) => {
@@ -30,9 +27,7 @@ export abstract class TestManagerBase<EntityOutputModel> {
   };
 
   async get(addressExtender: string = '', queryString: string = '') {
-    return await request(this.app.getHttpServer()).get(
-      this.endPoint + addressExtender + queryString,
-    );
+    return await request(this.app.getHttpServer()).get(this.endPoint + addressExtender + queryString);
   }
 
   async getWithAuth(addressExtender: string = '', queryString: string = '') {

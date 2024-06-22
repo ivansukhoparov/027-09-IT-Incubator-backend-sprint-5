@@ -16,11 +16,7 @@ export class PostsQueryRepository {
     protected postsLikesQueryRepository: PostsLikesQueryRepository,
   ) {}
 
-  async getAllPosts(
-    sortData: QuerySortType,
-    blogId?: string | null,
-    userId?: string | null,
-  ) {
+  async getAllPosts(sortData: QuerySortType, blogId?: string | null, userId?: string | null) {
     let searchKey = {};
 
     if (blogId) {
@@ -44,10 +40,7 @@ export class PostsQueryRepository {
     const mappedPosts: PostOutputDto[] = [];
 
     for (let i = 0; i < posts.length; i++) {
-      const likes = await this.postsLikesQueryRepository.getLikes(
-        posts[i]._id.toString(),
-        userId,
-      );
+      const likes = await this.postsLikesQueryRepository.getLikes(posts[i]._id.toString(), userId);
       mappedPosts.push(postMapper(posts[i], likes));
     }
 
@@ -71,10 +64,7 @@ export class PostsQueryRepository {
   //   return viewModel;
   // }
 
-  async getPostById(
-    id: string,
-    userId: string | null = null,
-  ): Promise<PostOutputDto> {
+  async getPostById(id: string, userId: string | null = null): Promise<PostOutputDto> {
     try {
       const post: PostDocument | null = await this.postModel.findById(id);
       if (!post) throw new NotFoundException();

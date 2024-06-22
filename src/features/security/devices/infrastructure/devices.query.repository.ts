@@ -13,9 +13,7 @@ export class DevicesQueryRepository {
     protected readonly refreshToken: RefreshToken,
   ) {}
 
-  async getSessionsByUserId(
-    refreshTokenValue: string,
-  ): Promise<SecurityDevicesOutput[]> {
+  async getSessionsByUserId(refreshTokenValue: string): Promise<SecurityDevicesOutput[]> {
     const refreshTokenPayload = this.refreshToken.decode(refreshTokenValue);
 
     if (!refreshTokenPayload) throw new UnauthorizedException();

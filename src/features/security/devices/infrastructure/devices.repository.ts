@@ -3,21 +3,15 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Session, SessionDocument } from './devices.schema';
 import { Model } from 'mongoose';
 import { InterlayerNotice } from '../../../../base/models/interlayer.notice';
-import {
-  SessionModel,
-  SessionUpdateModel,
-} from '../api/models/session.input.models';
+import { SessionModel, SessionUpdateModel } from '../api/models/session.input.models';
 
 @Injectable()
 export class DevicesRepository {
-  constructor(
-    @InjectModel(Session.name) protected sessionsModel: Model<Session>,
-  ) {}
+  constructor(@InjectModel(Session.name) protected sessionsModel: Model<Session>) {}
 
   async createNewSession(sessionModel: SessionModel) {
     try {
-      const session: SessionDocument =
-        await this.sessionsModel.create(sessionModel);
+      const session: SessionDocument = await this.sessionsModel.create(sessionModel);
       return session._id.toString();
     } catch {
       throw new Error();

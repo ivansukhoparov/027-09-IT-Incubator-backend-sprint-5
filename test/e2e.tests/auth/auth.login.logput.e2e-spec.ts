@@ -39,25 +39,19 @@ describe('Auth tests', () => {
     authTestManager = new AuthTestManager(app);
     usersTestManager = new UsersTestManager(app);
 
-    const deleteAll = await request(app.getHttpServer()).delete(
-      '/testing/all-data',
-    );
+    const deleteAll = await request(app.getHttpServer()).delete('/testing/all-data');
     expect(deleteAll.statusCode).toBe(HttpStatus.NO_CONTENT);
 
-    await usersTestManager
-      .createOne(new TestsCreateUserModel(1))
-      .then((res) => {
-        expect(res.statusCode).toBe(HttpStatus.CREATED);
-        user1 = res.body;
-      });
+    await usersTestManager.createOne(new TestsCreateUserModel(1)).then((res) => {
+      expect(res.statusCode).toBe(HttpStatus.CREATED);
+      user1 = res.body;
+    });
     user1.password = 'string';
 
-    await usersTestManager
-      .createOne(new TestsCreateUserModel(2))
-      .then((res) => {
-        expect(res.statusCode).toBe(HttpStatus.CREATED);
-        user2 = res.body;
-      });
+    await usersTestManager.createOne(new TestsCreateUserModel(2)).then((res) => {
+      expect(res.statusCode).toBe(HttpStatus.CREATED);
+      user2 = res.body;
+    });
     user2.password = 'string';
   });
 
@@ -159,11 +153,9 @@ describe('Auth tests', () => {
   });
 
   it(`- POST request to "refresh-token" endpoint with old refresh token should return code 401 `, async () => {
-    await authTestManager
-      .getNewRefreshToken(user1.oldRefreshToken)
-      .then((res) => {
-        expect(res.statusCode).toBe(HttpStatus.UNAUTHORIZED);
-      });
+    await authTestManager.getNewRefreshToken(user1.oldRefreshToken).then((res) => {
+      expect(res.statusCode).toBe(HttpStatus.UNAUTHORIZED);
+    });
   });
 
   it(`+ POST request to "refresh-token" endpoint with correct refresh token should return code 401 if token has been expired `, async () => {

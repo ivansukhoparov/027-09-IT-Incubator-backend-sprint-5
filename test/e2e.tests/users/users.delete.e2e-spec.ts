@@ -25,9 +25,7 @@ describe.skip('sa/users GET test', () => {
   afterAll(async () => {});
 
   beforeEach(async () => {
-    const deleteAll = await request(app.getHttpServer()).delete(
-      '/testing/all-data',
-    );
+    const deleteAll = await request(app.getHttpServer()).delete('/testing/all-data');
     expect(deleteAll.statusCode).toBe(HttpStatus.NO_CONTENT);
   });
 
@@ -60,9 +58,7 @@ describe.skip('sa/users GET test', () => {
     expect(res_1.body.items).toEqual(users);
 
     // delete user with invalid ID
-    const res_2 = await usersTestManager.delete(
-      '6c38f5e4-3f5b-4607-bb88-00d723af4634',
-    );
+    const res_2 = await usersTestManager.delete('6c38f5e4-3f5b-4607-bb88-00d723af4634');
     expect(res_2.statusCode).toBe(HttpStatus.NOT_FOUND);
 
     // check whether user have been deleted or not

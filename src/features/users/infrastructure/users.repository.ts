@@ -19,12 +19,7 @@ export class UsersRepository implements IUsersRepository {
             values($1,$2,$3,$4)
             RETURNING id
         `,
-        [
-          newUserDto.login,
-          newUserDto.email,
-          newUserDto.hash,
-          newUserDto.isConfirmed,
-        ],
+        [newUserDto.login, newUserDto.email, newUserDto.hash, newUserDto.isConfirmed],
       );
       return result[0].id;
     } catch {

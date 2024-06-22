@@ -7,10 +7,7 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class RefreshToken extends BaseToken<RefreshTokenDecodedDto> {
   constructor() {
-    super(
-      appSettings.api.JWT_SECRET_KEY,
-      appSettings.api.REFRESH_TOKEN_EXPIRATION_TIME,
-    );
+    super(appSettings.api.JWT_SECRET_KEY, appSettings.api.REFRESH_TOKEN_EXPIRATION_TIME);
   }
 
   tokenMapper(decodedToken: JwtPayload): RefreshTokenDecodedDto {

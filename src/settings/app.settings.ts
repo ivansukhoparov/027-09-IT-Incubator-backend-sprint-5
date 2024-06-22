@@ -3,11 +3,7 @@ import { config } from 'dotenv';
 config();
 
 export type EnvironmentVariable = { [key: string]: string | undefined };
-export type EnvironmentsTypes =
-  | 'DEVELOPMENT'
-  | 'STAGING'
-  | 'PRODUCTION'
-  | 'TESTING';
+export type EnvironmentsTypes = 'DEVELOPMENT' | 'STAGING' | 'PRODUCTION' | 'TESTING';
 export const Environments = ['DEVELOPMENT', 'STAGING', 'PRODUCTION', 'TESTING'];
 
 export class EnvironmentSettings {
@@ -88,11 +84,7 @@ class AppSettings {
   ) {}
 }
 
-const env = new EnvironmentSettings(
-  (Environments.includes(process.env.ENV?.trim())
-    ? process.env.ENV.trim()
-    : 'DEVELOPMENT') as EnvironmentsTypes,
-);
+const env = new EnvironmentSettings((Environments.includes(process.env.ENV?.trim()) ? process.env.ENV.trim() : 'DEVELOPMENT') as EnvironmentsTypes);
 
 const api = new APISettings(process.env);
 export const appSettings = new AppSettings(env, api);

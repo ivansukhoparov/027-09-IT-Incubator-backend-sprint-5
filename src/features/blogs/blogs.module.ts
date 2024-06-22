@@ -20,51 +20,20 @@ import { CommentsLikesQueryRepository } from './likes/infrastructure/commets.lik
 import { MongooseModule } from '@nestjs/mongoose';
 import { Blog, BlogSchema } from './blogs/infrastructure/blogs.schema';
 import { Post, PostSchema } from './posts/infrastructure/posts.schema';
-import {
-  Comments,
-  CommentSchema,
-} from './comments/infrastructure/comments.schema';
-import {
-  CommentLikes,
-  CommentLikesSchema,
-  PostsLikes,
-  PostsLikesSchema,
-} from './likes/infrastructure/likes.schema';
+import { Comments, CommentSchema } from './comments/infrastructure/comments.schema';
+import { CommentLikes, CommentLikesSchema, PostsLikes, PostsLikesSchema } from './likes/infrastructure/likes.schema';
 import { IsBlogExistConstraint } from '../../infrastructure/decorators/validate/is.blog.exist';
 import { UsersModule } from '../users/users.module';
 import { PublicBlogsController } from './blogs/api/public/public.blogs.controller';
 import { SecurityModule } from '../security/security.module';
 
-const controllers = [
-  AdminBlogsController,
-  PublicBlogsController,
-  PostsController,
-  CommentsController,
-];
+const controllers = [AdminBlogsController, PublicBlogsController, PostsController, CommentsController];
 
-const services = [
-  BlogsService,
-  PostsService,
-  CommentsService,
-  CommentsLikesService,
-  PostsLikesService,
-];
+const services = [BlogsService, PostsService, CommentsService, CommentsLikesService, PostsLikesService];
 
-const repositories = [
-  BlogsRepository,
-  PostsRepository,
-  CommentsRepository,
-  CommentsLikesRepository,
-  PostsLikesQueryRepository,
-  PostsLikesRepository,
-];
+const repositories = [BlogsRepository, PostsRepository, CommentsRepository, CommentsLikesRepository, PostsLikesQueryRepository, PostsLikesRepository];
 
-const queryRepositories = [
-  BlogsQueryRepository,
-  PostsQueryRepository,
-  CommentsQueryRepository,
-  CommentsLikesQueryRepository,
-];
+const queryRepositories = [BlogsQueryRepository, PostsQueryRepository, CommentsQueryRepository, CommentsLikesQueryRepository];
 
 const providers = [IsBlogExistConstraint];
 

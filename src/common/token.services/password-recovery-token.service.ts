@@ -7,10 +7,7 @@ import { PasswordRecoveryTokenDecodedDto } from './types/password.recovery.token
 @Injectable()
 export class PasswordRecoveryToken extends BaseToken<PasswordRecoveryTokenDecodedDto> {
   constructor() {
-    super(
-      appSettings.api.JWT_SECRET_KEY,
-      appSettings.api.RECOVERY_TOKEN_EXPIRATION_TIME,
-    );
+    super(appSettings.api.JWT_SECRET_KEY, appSettings.api.RECOVERY_TOKEN_EXPIRATION_TIME);
   }
 
   tokenMapper(decodedToken: JwtPayload): PasswordRecoveryTokenDecodedDto {

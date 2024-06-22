@@ -85,12 +85,7 @@ export class UsersRepositorySql implements IUsersRepository {
     }
   }
 
-  async getMany(
-    searchKey: any,
-    sortKey: any,
-    skipped: number,
-    pageSize: number,
-  ) {}
+  async getMany(searchKey: any, sortKey: any, skipped: number, pageSize: number) {}
 
   async countOfDocuments(searchKey: any) {
     return 0;

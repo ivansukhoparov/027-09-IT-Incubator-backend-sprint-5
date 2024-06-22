@@ -2,11 +2,7 @@ import { UserOutputModel } from '../../src/features/users/api/admin/models/user.
 import { TestManagerBase } from './base/test.manager.base';
 import { TestsCreateUserModel } from '../e2e.tests/users/dataset/users.models';
 import { INestApplication } from '@nestjs/common';
-import {
-  credentialsType,
-  testsEndPoints,
-  validAdminCredentials,
-} from '../common/tests.settings';
+import { credentialsType, testsEndPoints, validAdminCredentials } from '../common/tests.settings';
 import { ITestsCreateModel } from './base/tests.create.model.interface';
 
 export class UsersTestManager extends TestManagerBase<UserOutputModel> {

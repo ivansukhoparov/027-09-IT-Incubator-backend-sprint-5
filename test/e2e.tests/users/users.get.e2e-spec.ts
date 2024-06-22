@@ -22,9 +22,7 @@ describe.skip('sa/users GET test', () => {
   afterAll(async () => {});
 
   beforeEach(async () => {
-    const deleteAll = await request(app.getHttpServer()).delete(
-      '/testing/all-data',
-    );
+    const deleteAll = await request(app.getHttpServer()).delete('/testing/all-data');
     expect(deleteAll.statusCode).toBe(HttpStatus.NO_CONTENT);
   });
 
@@ -39,9 +37,7 @@ describe.skip('sa/users GET test', () => {
     const users = await usersTestManager.createMany(20);
     const res = await usersTestManager.getWithAuth();
     expect(res.statusCode).toBe(HttpStatus.OK);
-    expect(res.body).toEqual(
-      new TestViewModel(2, 1, 10, 20, users.splice(0, 10)),
-    );
+    expect(res.body).toEqual(new TestViewModel(2, 1, 10, 20, users.splice(0, 10)));
   });
 
   it(`+ GET request to '/sa/users' WITH "searchEmailTerm=2" QUERY should return correct ViewModel with correct pagination,
@@ -64,8 +60,7 @@ describe.skip('sa/users GET test', () => {
 
   it(`+ GET request to '/sa/users' WITH "sortBy=login&sortDirection=asc&pageSize=3&pageNumber=2" QUERY should return correct ViewModel with correct pagination,
   use additional method POST to '/sa/users' endpoint`, async () => {
-    const query =
-      '?searchLoginTerm=1&sortBy=login&sortDirection=asc&pageSize=3&pageNumber=2';
+    const query = '?searchLoginTerm=1&sortBy=login&sortDirection=asc&pageSize=3&pageNumber=2';
 
     const users = await usersTestManager.createMany(20);
     const res = await usersTestManager.getWithAuth(query);

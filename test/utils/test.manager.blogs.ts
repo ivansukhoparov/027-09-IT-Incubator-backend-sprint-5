@@ -31,10 +31,7 @@ export class BlogsTestManager {
   };
 
   async createOne(createBlogDto: any) {
-    return await request(this.app.getHttpServer())
-      .post('/blogs/')
-      .auth(this.accessData.user, this.accessData.password)
-      .send(createBlogDto);
+    return await request(this.app.getHttpServer()).post('/blogs/').auth(this.accessData.user, this.accessData.password).send(createBlogDto);
   }
 
   async updateOne(updateBlogDto: any, blogId: string) {

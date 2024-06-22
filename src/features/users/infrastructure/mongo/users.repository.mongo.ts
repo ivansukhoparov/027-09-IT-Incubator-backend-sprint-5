@@ -49,11 +49,7 @@ export class UsersRepositoryMongo implements IUsersRepository {
 
   async updateUser(id: string, userUpdateDto: UserUpdateDto) {
     try {
-      const isUpdate = await this.userModel.findOneAndUpdate(
-        { _id: new ObjectId(id) },
-        userUpdateDto,
-        { new: true },
-      );
+      const isUpdate = await this.userModel.findOneAndUpdate({ _id: new ObjectId(id) }, userUpdateDto, { new: true });
       if (isUpdate) return true;
       else return false;
     } catch (err) {
@@ -61,18 +57,8 @@ export class UsersRepositoryMongo implements IUsersRepository {
     }
   }
 
-  async getMany(
-    searchKey: any,
-    sortKey: any,
-    skipped: number,
-    pageSize: number,
-  ) {
-    return this.userModel
-      .find(searchKey)
-      .sort(sortKey)
-      .skip(skipped)
-      .limit(pageSize)
-      .lean();
+  async getMany(searchKey: any, sortKey: any, skipped: number, pageSize: number) {
+    return this.userModel.find(searchKey).sort(sortKey).skip(skipped).limit(pageSize).lean();
   }
 
   async countOfDocuments(searchKey: any) {

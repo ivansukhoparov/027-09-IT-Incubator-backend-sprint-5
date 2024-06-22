@@ -7,10 +7,7 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class EmailConfirmationCode extends BaseToken<ConfirmationCodeDecoded> {
   constructor() {
-    super(
-      appSettings.api.JWT_SECRET_KEY,
-      appSettings.api.EMAIL_CONFIRMATION_EXPIRATION_TIME,
-    );
+    super(appSettings.api.JWT_SECRET_KEY, appSettings.api.EMAIL_CONFIRMATION_EXPIRATION_TIME);
   }
 
   tokenMapper(decodedToken: JwtPayload): ConfirmationCodeDecoded {

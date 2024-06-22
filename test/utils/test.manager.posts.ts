@@ -33,10 +33,7 @@ export class PostsTestManager {
   };
 
   async createOne(createPostDto: any) {
-    return await request(this.app.getHttpServer())
-      .post(this.endPoint)
-      .auth(this.accessData.user, this.accessData.password)
-      .send(createPostDto);
+    return await request(this.app.getHttpServer()).post(this.endPoint).auth(this.accessData.user, this.accessData.password).send(createPostDto);
   }
 
   async updateOne(updatePostDto: any, id: string) {

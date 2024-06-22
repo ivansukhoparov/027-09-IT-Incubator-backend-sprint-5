@@ -10,10 +10,7 @@ export class TestingRepository {
 
   async dropMongoDb() {
     try {
-      const db =
-        appSettings.api.MONGO_CONNECTION_URI +
-        '/' +
-        appSettings.api.MONGO_DB_NAME;
+      const db = appSettings.api.MONGO_CONNECTION_URI + '/' + appSettings.api.MONGO_DB_NAME;
       const conn = mongoose.createConnection(db); // Connecting to the database.
       await conn.dropDatabase();
     } catch {
@@ -23,9 +20,7 @@ export class TestingRepository {
   }
 
   async deleteAll() {
-    const tables = await this.dataSource.query(
-      `SELECT "table_name" FROM information_schema.tables  where table_schema='public'`,
-    );
+    const tables = await this.dataSource.query(`SELECT "table_name" FROM information_schema.tables  where table_schema='public'`);
     const deleteAllQuery = tables
       .map((table: any) => {
         return `DELETE FROM "${table.table_name}"`;

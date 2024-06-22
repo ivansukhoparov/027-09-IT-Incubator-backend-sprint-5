@@ -26,9 +26,7 @@ export class DevicesController {
   @Get('devices')
   async getAllActiveSessions(@Req() req: Request) {
     try {
-      return await this.sessionsQueryRepository.getSessionsByUserId(
-        req.cookies.refreshToken,
-      );
+      return await this.sessionsQueryRepository.getSessionsByUserId(req.cookies.refreshToken);
     } catch {
       throw new UnauthorizedException();
     }
@@ -44,10 +42,7 @@ export class DevicesController {
   @Delete('devices/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async terminateSession(@Param('id') id: string, @Req() req: Request) {
-    const interlayerModel = await this.sessionsService.terminateSession(
-      id,
-      req.cookies.refreshToken,
-    );
+    const interlayerModel = await this.sessionsService.terminateSession(id, req.cookies.refreshToken);
     if (!interlayerModel.hasError()) return;
     if (interlayerModel.code === 401) throw new UnauthorizedException();
     if (interlayerModel.code === 404) throw new NotFoundException();

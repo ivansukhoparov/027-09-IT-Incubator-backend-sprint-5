@@ -1,16 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Post,
-  Put,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { QueryUsersRequestType } from '../../types/input';
 import { UserCreateInputModel } from './models/user.create.input.model';
 import { AdminAuthGuard } from '../../../../infrastructure/guards/admin-auth-guard.service';
@@ -35,9 +23,7 @@ export class AdminUsersController {
   async getAll(@Query() query: QueryUsersRequestType) {
     // const { sortData, searchData } = createQueryS(query);
     // return await this.usersQueryRepository.getAllUsers(sortData, searchData);
-    return await this.queryBus.execute<GetAllUsersQuery>(
-      new GetAllUsersQuery(query),
-    );
+    return await this.queryBus.execute<GetAllUsersQuery>(new GetAllUsersQuery(query));
   }
 
   @Get(':id')
@@ -51,10 +37,7 @@ export class AdminUsersController {
   @HttpCode(HttpStatus.CREATED)
   async createNew(@Body() inputModel: UserCreateInputModel) {
     //   const newUserId = await this.userService.create(inputModel);
-    const createdUserId = await this.commandBus.execute<
-      CreateUserCommand,
-      string
-    >(new CreateUserCommand(inputModel));
+    const createdUserId = await this.commandBus.execute<CreateUserCommand, string>(new CreateUserCommand(inputModel));
     return await this.usersQueryRepository.getById(createdUserId);
   }
 
@@ -63,9 +46,7 @@ export class AdminUsersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteById(@Param('id') id: string) {
     // await this.userService.delete(id);
-    await this.commandBus.execute<DeleteUserCommand, string>(
-      new DeleteUserCommand(id),
-    );
+    await this.commandBus.execute<DeleteUserCommand, string>(new DeleteUserCommand(id));
     return;
   }
 

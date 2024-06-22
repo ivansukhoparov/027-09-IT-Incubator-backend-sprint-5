@@ -1,9 +1,7 @@
 import { SecurityDevicesOutput, SecuritySessionType } from './output';
 import { WithId } from 'mongodb';
 
-export const securityMapper = (
-  session: WithId<SecuritySessionType>,
-): SecurityDevicesOutput => {
+export const securityMapper = (session: WithId<SecuritySessionType>): SecurityDevicesOutput => {
   return {
     deviceId: session.deviceId,
     ip: session.ip,

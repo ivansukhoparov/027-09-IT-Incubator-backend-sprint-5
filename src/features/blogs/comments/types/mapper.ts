@@ -1,10 +1,7 @@
 import { CommentOutputDto, CommentType, LikesInfoType } from './output';
 import { CommentDocument } from '../infrastructure/comments.schema';
 
-export const commentMapper = (
-  input: CommentDocument,
-  likes: LikesInfoType,
-): CommentOutputDto => {
+export const commentMapper = (input: CommentDocument, likes: LikesInfoType): CommentOutputDto => {
   return {
     id: input._id.toString(),
     content: input.content,

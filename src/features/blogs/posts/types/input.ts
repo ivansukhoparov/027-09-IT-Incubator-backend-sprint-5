@@ -26,10 +26,4 @@ export type SortPostRepositoryType = {
   pageSize: number;
 };
 
-export type PostSortType =
-  | 'title'
-  | 'shortDescription'
-  | 'content'
-  | 'blogId'
-  | 'blogName'
-  | 'createdAt';
+export type PostSortType = 'title' | 'shortDescription' | 'content' | 'blogId' | 'blogName' | 'createdAt';

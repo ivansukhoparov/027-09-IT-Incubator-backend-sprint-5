@@ -7,14 +7,8 @@ import { DevicesQueryRepository } from './devices/infrastructure/devices.query.r
 import { AuthService } from './auth/application/auth.service';
 import { RefreshTokenRepository } from './auth/infrastructure/refresh.token.repository';
 import { MongooseModule } from '@nestjs/mongoose';
-import {
-  DevicesSchema,
-  Session,
-} from './devices/infrastructure/devices.schema';
-import {
-  RefreshTokenBlackList,
-  RefreshTokenBlackListSchema,
-} from './auth/infrastructure/refresh.token.schema';
+import { DevicesSchema, Session } from './devices/infrastructure/devices.schema';
+import { RefreshTokenBlackList, RefreshTokenBlackListSchema } from './auth/infrastructure/refresh.token.schema';
 import { EmailMessagesManager } from '../../common/email/email.messages.manager';
 import { EmailService } from '../../common/email/email.service';
 import { NodemailerAdapter } from '../../common/adapters/nodemailer.adaper';
@@ -25,12 +19,7 @@ import { AccessToken } from '../../common/token.services/access-token.service';
 import { EmailConfirmationCode } from '../../common/token.services/email-confirmation-code.service';
 import { PasswordRecoveryToken } from '../../common/token.services/password-recovery-token.service';
 
-const tokenProviders = [
-  RefreshToken,
-  AccessToken,
-  EmailConfirmationCode,
-  PasswordRecoveryToken,
-];
+const tokenProviders = [RefreshToken, AccessToken, EmailConfirmationCode, PasswordRecoveryToken];
 
 @Module({
   imports: [
@@ -59,11 +48,6 @@ const tokenProviders = [
     NodemailerAdapter,
     JwtTokenAdapter,
   ],
-  exports: [
-    RefreshToken,
-    AccessToken,
-    EmailConfirmationCode,
-    PasswordRecoveryToken,
-  ],
+  exports: [RefreshToken, AccessToken, EmailConfirmationCode, PasswordRecoveryToken],
 })
 export class SecurityModule {}

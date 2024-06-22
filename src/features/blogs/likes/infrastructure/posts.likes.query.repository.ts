@@ -5,17 +5,13 @@ import { Model } from 'mongoose';
 import { PostsLikesInfoType } from '../../posts/types/mapper';
 
 export class PostsLikesQueryRepository {
-  constructor(
-    @InjectModel(PostsLikes.name) private postsLikesModel: Model<PostsLikes>,
-  ) {}
+  constructor(@InjectModel(PostsLikes.name) private postsLikesModel: Model<PostsLikes>) {}
 
   async getLikes(postId: string, userId?: string): Promise<PostsLikesInfoType> {
     let likeStatus: LikeStatusType = 'None';
 
     if (userId) {
-      const userLike = await this.postsLikesModel
-        .findOne({ $and: [{ postId: postId }, { likeOwnerId: userId }] })
-        .lean();
+      const userLike = await this.postsLikesModel.findOne({ $and: [{ postId: postId }, { likeOwnerId: userId }] }).lean();
       if (userLike) {
         likeStatus = userLike.status;
       }

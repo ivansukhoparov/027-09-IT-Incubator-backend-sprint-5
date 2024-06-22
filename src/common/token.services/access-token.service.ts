@@ -8,10 +8,7 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class AccessToken extends BaseToken<AccessTokenDecodedDto> {
   constructor() {
-    super(
-      appSettings.api.JWT_SECRET_KEY,
-      appSettings.api.ACCESS_TOKEN_EXPIRATION_TIME,
-    );
+    super(appSettings.api.JWT_SECRET_KEY, appSettings.api.ACCESS_TOKEN_EXPIRATION_TIME);
   }
 
   tokenMapper(decodedToken: JwtPayload): AccessTokenDecodedDto {

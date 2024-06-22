@@ -1,8 +1,4 @@
-import {
-  BadGatewayException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadGatewayException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CommentDocument, Comments } from './comments.schema';
@@ -19,11 +15,7 @@ export class CommentsQueryRepository {
     protected commentsLikesQueryRepository: CommentsLikesQueryRepository,
     protected postsService: PostsService,
   ) {}
-  async getAllCommentsByPostId(
-    sortData: QuerySortType,
-    postId: string,
-    userId?: string,
-  ): Promise<ViewModelType<OutputCommentType> | null> {
+  async getAllCommentsByPostId(sortData: QuerySortType, postId: string, userId?: string): Promise<ViewModelType<OutputCommentType> | null> {
     try {
       await this.postsService.findById(postId);
 
@@ -44,15 +36,8 @@ export class CommentsQueryRepository {
 
       for (let i = 0; i < comments.length; i++) {
         let likes: LikesInfoType;
-        if (userId)
-          likes = await this.commentsLikesQueryRepository.getLikes(
-            comments[i]._id.toString(),
-            userId,
-          );
-        else
-          likes = await this.commentsLikesQueryRepository.getLikes(
-            comments[i]._id.toString(),
-          );
+        if (userId) likes = await this.commentsLikesQueryRepository.getLikes(comments[i]._id.toString(), userId);
+        else likes = await this.commentsLikesQueryRepository.getLikes(comments[i]._id.toString());
 
         mappedComments.push(commentMapper(comments[i], likes));
       }
@@ -71,13 +56,8 @@ export class CommentsQueryRepository {
   async getById(commentId: string, userId?: string) {
     try {
       let likes: LikesInfoType;
-      const comment: CommentDocument =
-        await this.commentModel.findById(commentId);
-      if (userId)
-        likes = await this.commentsLikesQueryRepository.getLikes(
-          commentId,
-          userId,
-        );
+      const comment: CommentDocument = await this.commentModel.findById(commentId);
+      if (userId) likes = await this.commentsLikesQueryRepository.getLikes(commentId, userId);
       else likes = await this.commentsLikesQueryRepository.getLikes(commentId);
       // const likes: LikesInfoType = {
       //     likesCount: 0,

@@ -29,11 +29,7 @@ export class PostsRepository {
   // update existing blog
   async updatePost(id: string, updateDto: PostUpdateDto) {
     try {
-      const result = await this.postModel.findOneAndUpdate(
-        { _id: new ObjectId(id) },
-        updateDto,
-        { new: true },
-      );
+      const result = await this.postModel.findOneAndUpdate({ _id: new ObjectId(id) }, updateDto, { new: true });
       if (result) return true;
       else throw new NotFoundException();
     } catch {

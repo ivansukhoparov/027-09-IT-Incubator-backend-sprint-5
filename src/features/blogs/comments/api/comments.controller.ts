@@ -51,16 +51,11 @@ export class CommentsController {
   @Put(':id')
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async updateComment(
-    @Param('id') id: string,
-    @Body() inputModel: UpdateCommentInputModel,
-    @Req() req: Request,
-  ) {
+  async updateComment(@Param('id') id: string, @Body() inputModel: UpdateCommentInputModel, @Req() req: Request) {
     const authHeader = req.header('authorization')?.split(' ');
     const accessTokenPayload = this.accessToken.decode(authHeader[1]);
     const userId = accessTokenPayload.userId;
-    const comment: CommentDocument =
-      await this.commentsService.getCommentById(id);
+    const comment: CommentDocument = await this.commentsService.getCommentById(id);
     if (userId != comment.commentatorInfo.userId) {
       throw new ForbiddenException();
     }
@@ -75,8 +70,7 @@ export class CommentsController {
     const authHeader = req.header('authorization')?.split(' ');
     const accessTokenPayload = this.accessToken.decode(authHeader[1]);
     const userId = accessTokenPayload.userId;
-    const comment: CommentDocument =
-      await this.commentsService.getCommentById(id);
+    const comment: CommentDocument = await this.commentsService.getCommentById(id);
 
     if (userId != comment.commentatorInfo.userId) {
       throw new ForbiddenException();
@@ -88,11 +82,7 @@ export class CommentsController {
   @Put(':commentId/like-status')
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async updateLikeStatus(
-    @Param('commentId') commentId: string,
-    @Body() inputModel: CommentsLikesInputModel,
-    @Req() req: any,
-  ) {
+  async updateLikeStatus(@Param('commentId') commentId: string, @Body() inputModel: CommentsLikesInputModel, @Req() req: any) {
     const isCommentExist = await this.commentsService.isCommentExist(commentId);
     if (!isCommentExist) throw new NotFoundException();
     const authHeader = req.header('authorization')?.split(' ');

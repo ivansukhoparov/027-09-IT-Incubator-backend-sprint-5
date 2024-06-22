@@ -2,10 +2,7 @@ import { WithId } from 'mongodb';
 import { PostLikeDto, PostOutputDto, PostType } from './output';
 import { LikeStatusType } from '../../likes/types/input';
 
-export const postMapper = (
-  post: WithId<PostType>,
-  likes: PostsLikesInfoType,
-): PostOutputDto => {
+export const postMapper = (post: WithId<PostType>, likes: PostsLikesInfoType): PostOutputDto => {
   return {
     id: post._id.toString(),
     title: post.title,

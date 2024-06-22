@@ -2,10 +2,7 @@ import { BlogsRepository } from '../infrastructure/blogs.repository';
 import { Injectable } from '@nestjs/common';
 import { Blog } from '../infrastructure/blogs.schema';
 import { blogMapper } from '../types/mapper';
-import {
-  CreateBlogInputModel,
-  UpdateBlogInputModel,
-} from '../api/admin/models/blogs.input.models';
+import { CreateBlogInputModel, UpdateBlogInputModel } from '../api/admin/models/blogs.input.models';
 
 @Injectable()
 export class BlogsService {

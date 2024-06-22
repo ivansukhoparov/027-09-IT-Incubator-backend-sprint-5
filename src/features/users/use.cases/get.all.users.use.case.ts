@@ -1,8 +1,4 @@
-import {
-  QueryRequestType,
-  QuerySortType,
-  SearchType,
-} from '../../common/types';
+import { QueryRequestType, QuerySortType, SearchType } from '../../common/types';
 import { userMapper } from '../types/mapper';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { UsersQueryRepository } from '../infrastructure/users.query.repository';
@@ -51,19 +47,12 @@ export class GetAllUsersUseCase implements IQueryHandler<GetAllUsersQuery> {
     //   searchKey = { $or: searchKeysArray };
     // }
     // calculate limits for DB request
-    const documentsTotalCount =
-      await this.usersQueryRepository.countOfDocuments(query.searchData); // Receive total count of blogs
+    const documentsTotalCount = await this.usersQueryRepository.countOfDocuments(query.searchData); // Receive total count of blogs
     const pageCount = Math.ceil(documentsTotalCount / +query.sortData.pageSize); // Calculate total pages count according to page size
-    const skippedDocuments =
-      (+query.sortData.pageNumber - 1) * +query.sortData.pageSize; // Calculate count of skipped docs before requested page
+    const skippedDocuments = (+query.sortData.pageNumber - 1) * +query.sortData.pageSize; // Calculate count of skipped docs before requested page
 
     // Get documents from DB
-    const users = await this.usersQueryRepository.getMany(
-      query.searchData,
-      query.sortData,
-      +skippedDocuments,
-      +query.sortData.pageSize,
-    );
+    const users = await this.usersQueryRepository.getMany(query.searchData, query.sortData, +skippedDocuments, +query.sortData.pageSize);
 
     return {
       pagesCount: pageCount,

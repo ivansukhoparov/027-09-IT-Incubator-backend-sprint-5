@@ -19,10 +19,7 @@ export class CommentsLikesRepository {
     });
     if (!comment) throw new NotFoundException();
     const like = await this.commentLikesModel.findOne({
-      $and: [
-        { likeOwnerId: updateModel.likeOwnerId },
-        { commentId: updateModel.commentId },
-      ],
+      $and: [{ likeOwnerId: updateModel.likeOwnerId }, { commentId: updateModel.commentId }],
     });
 
     if (like) {

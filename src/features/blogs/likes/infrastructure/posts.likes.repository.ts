@@ -19,10 +19,7 @@ export class PostsLikesRepository {
       });
       if (!post) throw new NotFoundException();
       const like = await this.postsLikesModel.findOne({
-        $and: [
-          { likeOwnerId: updateModel.likeOwnerId },
-          { postId: updateModel.postId },
-        ],
+        $and: [{ likeOwnerId: updateModel.likeOwnerId }, { postId: updateModel.postId }],
       });
       if (like) {
         like.status = updateModel.status;

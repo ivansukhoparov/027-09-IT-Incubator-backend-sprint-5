@@ -17,11 +17,7 @@ export class AuthTestManager {
       .set('authorization', 'Bearer ' + accessToken);
   }
 
-  async loginUser(
-    credentials: LoginInputModel,
-    ip: string = '1.2.3.4',
-    device: string = 'tests_device',
-  ) {
+  async loginUser(credentials: LoginInputModel, ip: string = '1.2.3.4', device: string = 'tests_device') {
     return await request(this.app.getHttpServer())
       .post(this.endPoint + '/login')
       .set('user-agent', device)

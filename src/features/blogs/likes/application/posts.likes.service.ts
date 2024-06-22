@@ -13,11 +13,7 @@ export class PostsLikesService {
     protected userService: UsersService,
   ) {}
 
-  async updateLike(
-    userId: string,
-    postId: string,
-    inputModel: CommentsLikesInputModel,
-  ) {
+  async updateLike(userId: string, postId: string, inputModel: CommentsLikesInputModel) {
     const createdAt = new Date();
     const user = await this.userService.getUserById(userId);
 

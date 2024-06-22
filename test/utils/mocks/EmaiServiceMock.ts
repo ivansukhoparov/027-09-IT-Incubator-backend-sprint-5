@@ -5,28 +5,19 @@ import { UserType } from '../../../src/features/users/types/output';
 export class MockEmailService {
   constructor() {}
 
-  async sendEmailConfirmationEmail(
-    user: UserType,
-    confirmationCode: string,
-  ): Promise<boolean> {
+  async sendEmailConfirmationEmail(user: UserType, confirmationCode: string): Promise<boolean> {
     return new Promise((res) => {
       res(true);
     });
   }
 
-  async reSendEmailConfirmationEmail(
-    user: UserType,
-    confirmationCode: string,
-  ): Promise<boolean> {
+  async reSendEmailConfirmationEmail(user: UserType, confirmationCode: string): Promise<boolean> {
     return new Promise((res) => {
       res(true);
     });
   }
 
-  async sendPasswordRecoveryCode(
-    user: UserType,
-    recoveryCode: string,
-  ): Promise<boolean> {
+  async sendPasswordRecoveryCode(user: UserType, recoveryCode: string): Promise<boolean> {
     return new Promise((res) => {
       res(true);
     });

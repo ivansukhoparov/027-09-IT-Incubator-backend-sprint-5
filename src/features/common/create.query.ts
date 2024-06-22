@@ -1,10 +1,4 @@
-import {
-  QueryDto,
-  QueryRequestType,
-  QuerySearchType,
-  QuerySortType,
-  SearchType,
-} from './types';
+import { QueryDto, QueryRequestType, QuerySearchType, QuerySortType, SearchType } from './types';
 
 export const createQuery = (query: QueryRequestType): QueryDto => {
   const searchData: QuerySearchType = {};

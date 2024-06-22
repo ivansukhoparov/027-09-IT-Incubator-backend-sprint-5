@@ -24,13 +24,7 @@ export class BlogsRepository {
       VALUES $1,$2,$3,$4,$5
       RETURNING id
       `,
-        [
-          newBlog.name,
-          newBlog.description,
-          newBlog.websiteUrl,
-          newBlog.createdAt,
-          newBlog.isMembership,
-        ],
+        [newBlog.name, newBlog.description, newBlog.websiteUrl, newBlog.createdAt, newBlog.isMembership],
       );
       return createdBlog[0].id;
     } catch {

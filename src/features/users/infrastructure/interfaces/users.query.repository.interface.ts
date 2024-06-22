@@ -5,12 +5,7 @@ export interface IUsersQueryRepository {
 
   getUserAuthMe(id: string): Promise<UserOutputMeType>;
 
-  getMany(
-    searchKey: any,
-    sortKey: any,
-    skipped: number,
-    pageSize: number,
-  ): Promise<any>;
+  getMany(searchKey: any, sortKey: any, skipped: number, pageSize: number): Promise<any>;
 
   countOfDocuments(searchKey: any): Promise<number>;
 }

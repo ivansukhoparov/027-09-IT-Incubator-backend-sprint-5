@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  NotFoundException,
-  Param,
-  Query,
-  Req,
-} from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, Query, Req } from '@nestjs/common';
 import { BlogsQueryRepository } from '../../infrastructure/blogs.query.repository';
 import { PostsQueryRepository } from '../../../posts/infrastructure/posts.query.repository';
 import { Request } from 'express';
@@ -33,11 +26,7 @@ export class PublicBlogsController {
   }
 
   @Get(':blogId/posts')
-  async getAllBlogPosts(
-    @Param('blogId') blogId: string,
-    @Query() query: QueryUsersRequestType,
-    @Req() req: Request,
-  ) {
+  async getAllBlogPosts(@Param('blogId') blogId: string, @Query() query: QueryUsersRequestType, @Req() req: Request) {
     const { sortData, searchData } = createQuery(query);
 
     try {
@@ -45,11 +34,7 @@ export class PublicBlogsController {
         const authHeader = req.header('authorization')?.split(' ');
         const accessTokenPayload = this.accessToken.decode(authHeader[1]);
         const userId = accessTokenPayload.userId;
-        return await this.postsQueryRepository.getAllPosts(
-          sortData,
-          blogId,
-          userId,
-        );
+        return await this.postsQueryRepository.getAllPosts(sortData, blogId, userId);
       } catch {
         return await this.postsQueryRepository.getAllPosts(sortData, blogId);
       }

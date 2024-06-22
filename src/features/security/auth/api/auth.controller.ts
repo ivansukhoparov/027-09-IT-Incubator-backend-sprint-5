@@ -1,15 +1,4 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Post,
-  UseGuards,
-  Res,
-  Get,
-  Req,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Res, Get, Req, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { UserConfirmationCodeDto } from '../types/input';
 import { AuthService } from '../application/auth.service';
 import { LoginInputModel, UserEmailDto } from './models/login.input.model';
@@ -51,15 +40,24 @@ export class AuthController {
   @Post('registration')
   @HttpCode(HttpStatus.NO_CONTENT)
   async registration(@Body() registrationDto: UserCreateInputModel) {
-    const isSuccess = await this.authService.registerUser(registrationDto);
-    if (isSuccess) return;
+    const interlayerNotice = await this.authService.registerUser(registrationDto);
+    if (interlayerNotice.hasError()) {
+      throw new BadRequestException({
+        errorsMessages: [
+          {
+            message: interlayerNotice.extension.msg,
+            field: interlayerNotice.extension.key,
+          },
+        ],
+      });
+    } else {
+      return;
+    }
   }
 
   @Post('registration-confirmation')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async registrationConfirmation(
-    @Body() confirmationCode: UserConfirmationCodeDto,
-  ) {
+  async registrationConfirmation(@Body() confirmationCode: UserConfirmationCodeDto) {
     const isSuccess = await this.authService.confirmEmail(confirmationCode);
     if (isSuccess) return;
   }
@@ -67,8 +65,7 @@ export class AuthController {
   @Post('registration-email-resending')
   @HttpCode(HttpStatus.NO_CONTENT)
   async registrationEmailResending(@Body() resendingRequestDto: UserEmailDto) {
-    const isSuccess =
-      await this.authService.resendConfirmationCode(resendingRequestDto);
+    const isSuccess = await this.authService.resendConfirmationCode(resendingRequestDto);
     if (isSuccess) return;
   }
 
@@ -81,15 +78,11 @@ export class AuthController {
   @SkipThrottle()
   @Post('refresh-token')
   @HttpCode(HttpStatus.OK)
-  async getNewRefreshToken(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async getNewRefreshToken(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     try {
       //const oldRefreshToken = req.headers['cookie'].split('=')[1];
       const oldRefreshToken = req.cookies.refreshToken;
-      const { accessToken, refreshToken } =
-        await this.authService.refreshTokens(oldRefreshToken);
+      const { accessToken, refreshToken } = await this.authService.refreshTokens(oldRefreshToken);
 
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
@@ -104,20 +97,13 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(
-    @Res({ passthrough: true }) res: Response,
-    @Body() loginDto: LoginInputModel,
-    @Req() req: Request,
-  ) {
+  async login(@Res({ passthrough: true }) res: Response, @Body() loginDto: LoginInputModel, @Req() req: Request) {
     const sessionInputModel: SessionInputModel = {
       deviceTitle: req.header('user-agent')?.split(' ')[1] || 'unknown',
       ip: req.ip || 'unknown',
     };
 
-    const { accessToken, refreshToken } = await this.authService.loginUser(
-      loginDto,
-      sessionInputModel,
-    );
+    const { accessToken, refreshToken } = await this.authService.loginUser(loginDto, sessionInputModel);
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,

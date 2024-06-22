@@ -7,11 +7,7 @@ import { CommentsLikesInputModel } from '../api/models/likes.input.models';
 export class CommentsLikesService {
   constructor(protected commentsLikesRepository: CommentsLikesRepository) {}
 
-  async updateLike(
-    userId: string,
-    commentId: string,
-    inputModel: CommentsLikesInputModel,
-  ) {
+  async updateLike(userId: string, commentId: string, inputModel: CommentsLikesInputModel) {
     const updateModel: CommentLikes = {
       commentId: commentId,
       likeOwnerId: userId,

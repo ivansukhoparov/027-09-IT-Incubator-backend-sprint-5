@@ -3,10 +3,7 @@ import { PostsRepository } from '../infrastructure/posts.repository';
 import { BlogsRepository } from '../../blogs/infrastructure/blogs.repository';
 import { Post } from '../infrastructure/posts.schema';
 import { BlogDocument } from '../../blogs/infrastructure/blogs.schema';
-import {
-  CreatePostInputModel,
-  UpdatePostInputModel,
-} from '../api/models/posts.input.models';
+import { CreatePostInputModel, UpdatePostInputModel } from '../api/models/posts.input.models';
 import { PostUpdateDto } from '../types/input';
 
 @Injectable()
@@ -23,9 +20,7 @@ export class PostsService {
   async createNewPost(createPostInputModel: CreatePostInputModel) {
     const createdAt = new Date();
 
-    const parentBlog: BlogDocument = await this.blogsRepository.getBlogById(
-      createPostInputModel.blogId,
-    );
+    const parentBlog: BlogDocument = await this.blogsRepository.getBlogById(createPostInputModel.blogId);
 
     if (!parentBlog) throw new NotFoundException();
 
@@ -42,11 +37,7 @@ export class PostsService {
     return newPostId;
   }
 
-  async updatePost(
-    postId: string,
-    updateDto: UpdatePostInputModel,
-    blogId: string,
-  ) {
+  async updatePost(postId: string, updateDto: UpdatePostInputModel, blogId: string) {
     const postDto = {
       ...updateDto,
       blogId: blogId,
