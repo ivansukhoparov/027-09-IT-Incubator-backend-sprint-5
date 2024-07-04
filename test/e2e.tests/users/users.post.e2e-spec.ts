@@ -11,7 +11,7 @@ import {
 import { createLengthString, ErrorsResponse } from '../../datasets/dataset';
 import { creteTestApp } from '../../common/create.test.app';
 
-describe.skip('sa/users POST test', () => {
+describe('sa/users POST test', () => {
   let app: INestApplication;
   let usersTestManager: UsersTestManager;
   let usersTestManagerNotAuth: UsersTestManager;
