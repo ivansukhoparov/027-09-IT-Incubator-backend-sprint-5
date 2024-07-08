@@ -120,10 +120,10 @@ describe('sa/users POST test', () => {
 
     // With empty email field
     const createUserDtoInvalidEmail = new TestsCreateUserModel(1);
-    createUserDtoInvalidEmail.password = '';
+    createUserDtoInvalidEmail.email = '';
     await usersTestManager.createOne(createUserDtoInvalidEmail).then((res) => {
       expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST);
-      expect(res.body).toEqual(errorsResponse.getBody(['password']));
+      expect(res.body).toEqual(errorsResponse.getBody(['email']));
     });
   });
 
