@@ -20,9 +20,9 @@ export class PublicBlogsController {
     return await this.blogsQueryRepository.getAllBlogs(sortData, searchData);
   }
 
-  @Get(':id')
-  async getById(@Param('id') userId: string) {
-    return await this.blogsQueryRepository.getBlogById(userId);
+  @Get(':blogId')
+  async getById(@Param('blogId') blogId: string) {
+    return await this.blogsQueryRepository.getBlogById(blogId);
   }
 
   @Get(':blogId/posts')
